@@ -1315,10 +1315,11 @@ export class App {
     // Default to MENA view on mobile for better focus
     // Uses deck.gl (WebGL) on desktop, falls back to D3/SVG on mobile
     const mapContainer = document.getElementById('mapContainer') as HTMLElement;
+    const defaultView = SITE_VARIANT == 'polkam' ? 'indonesia' : 'global';
     this.map = new MapContainer(mapContainer, {
       zoom: this.isMobile ? 2.5 : 1.0,
       pan: { x: 0, y: 0 },  // Centered view to show full world
-      view: this.isMobile ? 'mena' : 'global',
+      view: this.isMobile ? 'mena' : defaultView,
       layers: this.mapLayers,
       timeRange: '7d',
     });

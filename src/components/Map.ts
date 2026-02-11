@@ -2750,7 +2750,11 @@ export class MapComponent {
     this.state.zoom = 1;
     this.state.pan = { x: 0, y: 0 };
     if (this.state.view !== 'global') {
-      this.state.view = 'global';
+      if(SITE_VARIANT == 'polkam'){
+        this.state.view = 'indonesia';
+      }else{
+        this.state.view = 'global';
+      }
       this.render();
     } else {
       this.applyTransform();
