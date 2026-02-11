@@ -65,7 +65,16 @@ const TECH_LIVE_CHANNELS: LiveChannel[] = [
   { id: 'nasa', name: 'NASA TV', handle: '@NASA', fallbackVideoId: 'fO9e9jnhYK8', useFallbackOnly: true },
 ];
 
-const LIVE_CHANNELS = SITE_VARIANT === 'tech' ? TECH_LIVE_CHANNELS : FULL_LIVE_CHANNELS;
+//polkam variant: Indonesia Channels
+const POLKAM_LIVE_CHANNELS: LiveChannel[] = [
+  { id: 'kompas', name: 'Kompas TV', handle: '@kompastv', fallbackVideoId: 'DOOrIxw5xOw', useFallbackOnly: true },
+  { id: 'tvone', name: 'TV One', handle: '@tvOneNews', fallbackVideoId: 'yNKvkPJl-tg', useFallbackOnly: true },
+  { id: 'metrotv', name: 'Metro TV', handle: '@metrotvnews', fallbackVideoId: 'AUE5iHINUIw', useFallbackOnly: true },
+  { id: 'inews', name: 'iNews TV', handle: '@OfficialiNews', fallbackVideoId: 'JM82Z-l7Wes', useFallbackOnly: true },
+  { id: 'cnnindonesia', name: 'CNN Indonesia', handle: '@CNNIDOFFICIAL', fallbackVideoId: 'a0vX_Qt0gDQ', useFallbackOnly: true },
+];
+
+const LIVE_CHANNELS = SITE_VARIANT === 'tech' ? TECH_LIVE_CHANNELS : SITE_VARIANT === 'polkam' ? POLKAM_LIVE_CHANNELS : FULL_LIVE_CHANNELS;
 
 // Cache for live video IDs
 const liveVideoCache = new Map<string, { videoId: string | null; timestamp: number }>();
