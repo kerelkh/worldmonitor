@@ -1075,8 +1075,8 @@ export class App {
       <div class="header">
         <div class="header-left">
           <div class="variant-switcher">
-            <a href="${SITE_VARIANT === 'tech' ? 'https://worldmonitor.app' : '#'}"
-               class="variant-option ${SITE_VARIANT !== 'tech' ? 'active' : ''}"
+            <a href="${SITE_VARIANT === 'full' ? '#' : 'https://worldmonitor.app'}"
+               class="variant-option ${SITE_VARIANT == 'full' ? 'active' : ''}"
                data-variant="world"
                title="Geopolitical Intelligence">
               <span class="variant-icon">🌍</span>
@@ -1089,6 +1089,13 @@ export class App {
                title="Tech & AI Intelligence">
               <span class="variant-icon">💻</span>
               <span class="variant-label">TECH</span>
+            </a>
+            <a href="${SITE_VARIANT === 'polkam' ? '#' : 'localhost:3000'}"
+               class="variant-option ${SITE_VARIANT === 'polkam' ? 'active' : ''}"
+               data-variant="polkam"
+               title="Polkam Intelligence (Coming Soon)">
+              <span class="variant-icon">🏛️</span>
+              <span class="variant-label">POLKAM</span>
             </a>
           </div>
           <span class="logo">MONITOR</span><span class="version">v${__APP_VERSION__}</span>
@@ -1106,6 +1113,7 @@ export class App {
           <div class="region-selector">
             <select id="regionSelect" class="region-select">
               <option value="global">Global</option>
+              <option value="indonesia">Indonesia</option>
               <option value="america">Americas</option>
               <option value="mena">MENA</option>
               <option value="eu">Europe</option>

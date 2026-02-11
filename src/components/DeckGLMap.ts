@@ -63,7 +63,7 @@ import { getCountryScore } from '@/services/country-instability';
 import { getAlertsNearLocation } from '@/services/geo-convergence';
 
 export type TimeRange = '1h' | '6h' | '24h' | '48h' | '7d' | 'all';
-export type DeckMapView = 'global' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
+export type DeckMapView = 'global' | 'indonesia' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
 
 interface DeckMapState {
   zoom: number;
@@ -93,6 +93,7 @@ interface TechEventMarker {
 // View presets with longitude, latitude, zoom
 const VIEW_PRESETS: Record<DeckMapView, { longitude: number; latitude: number; zoom: number }> = {
   global: { longitude: 0, latitude: 20, zoom: 1.5 },
+  indonesia: { longitude: 118, latitude : -2, zoom: 4 },
   america: { longitude: -95, latitude: 38, zoom: 3 },
   mena: { longitude: 45, latitude: 28, zoom: 3.5 },
   eu: { longitude: 15, latitude: 50, zoom: 3.5 },

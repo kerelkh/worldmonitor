@@ -46,7 +46,7 @@ import { getCountryScore } from '@/services/country-instability';
 import { getAlertsNearLocation } from '@/services/geo-convergence';
 
 export type TimeRange = '1h' | '6h' | '24h' | '48h' | '7d' | 'all';
-export type MapView = 'global' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
+export type MapView = 'global' | 'indonesia' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
 
 interface MapState {
   zoom: number;
@@ -2648,6 +2648,7 @@ export class MapComponent {
     // Pan: +x = west, -x = east, +y = north, -y = south
     const viewSettings: Record<MapView, { zoom: number; pan: { x: number; y: number } }> = {
       global: { zoom: 1, pan: { x: 0, y: 0 } },
+      indonesia: { zoom: 3.5, pan: { x: -100, y: -20 } },
       america: { zoom: 1.8, pan: { x: 180, y: 30 } },
       mena: { zoom: 3.5, pan: { x: -100, y: 50 } },
       eu: { zoom: 2.4, pan: { x: -30, y: 100 } },
