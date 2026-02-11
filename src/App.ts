@@ -2121,7 +2121,15 @@ export class App {
     const now = new Date();
     const el = document.getElementById('timeDisplay');
     if (el) {
-      el.textContent = now.toUTCString().split(' ')[4] + ' UTC';
+      const timeWIB = now.toLocaleTimeString('en-GB', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    el.textContent = timeWIB + ' WIB';
     }
   }
 

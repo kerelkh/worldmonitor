@@ -2188,7 +2188,31 @@ export class DeckGLMap {
     const el = document.getElementById('deckglTimestamp');
     if (el) {
       const now = new Date();
-      el.textContent = `${now.toUTCString().replace('GMT', 'UTC')}`;
+      // el.textContent = `${now.toUTCString().replace('GMT', 'UTC')}`;
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+
+      const parts = formatter.formatToParts(now);
+
+      const map: Record<string, string> = {};
+      parts.forEach(p => {
+        if (p.type !== 'literal') {
+          map[p.type] = p.value;
+        }
+      });
+
+      el.textContent =
+        `${map.weekday}, ${map.day} ${map.month} ${map.year} ` +
+        `${map.hour}:${map.minute}:${map.second} WIB`;
     }
   }
 
