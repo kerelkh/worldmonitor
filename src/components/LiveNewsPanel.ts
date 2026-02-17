@@ -110,13 +110,12 @@ export class LiveNewsPanel extends Panel {
   private channelSwitcher: HTMLElement | null = null;
   private isMuted = true;
   private isPlaying = true;
-  private wasPlayingBeforeIdle = true;
+  private wasPlayingBeforeHidden = true;
   private muteBtn: HTMLButtonElement | null = null;
   private liveBtn: HTMLButtonElement | null = null;
-  private idleTimeout: ReturnType<typeof setTimeout> | null = null;
-  private readonly IDLE_PAUSE_MS = 5 * 60 * 1000; // 5 minutes
+  private hiddenTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly HIDDEN_PAUSE_MS = 5 * 60 * 1000; // 5 minutes
   private boundVisibilityHandler!: () => void;
-  private boundIdleResetHandler!: () => void;
 
   // YouTube Player API state
   private player: YouTubePlayer | null = null;
@@ -138,33 +137,26 @@ export class LiveNewsPanel extends Panel {
   }
 
   private setupIdleDetection(): void {
-    // Pause when tab becomes hidden
+    // Only pause when tab is hidden for 5 minutes
     this.boundVisibilityHandler = () => {
       if (document.hidden) {
-        this.pauseForIdle();
+        // Start timer — pause after 5 minutes of being hidden
+        this.hiddenTimeout = setTimeout(() => this.pauseForHidden(), this.HIDDEN_PAUSE_MS);
       } else {
-        this.resumeFromIdle();
+        // Tab became visible — cancel pending pause and resume if needed
+        if (this.hiddenTimeout) {
+          clearTimeout(this.hiddenTimeout);
+          this.hiddenTimeout = null;
+        }
+        this.resumeFromHidden();
       }
     };
     document.addEventListener('visibilitychange', this.boundVisibilityHandler);
-
-    // Track user activity to detect idle
-    this.boundIdleResetHandler = () => {
-      if (this.idleTimeout) clearTimeout(this.idleTimeout);
-      this.idleTimeout = setTimeout(() => this.pauseForIdle(), this.IDLE_PAUSE_MS);
-    };
-
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
-      document.addEventListener(event, this.boundIdleResetHandler, { passive: true });
-    });
-
-    // Start the idle timer
-    this.boundIdleResetHandler();
   }
 
-  private pauseForIdle(): void {
+  private pauseForHidden(): void {
     if (this.isPlaying) {
-      this.wasPlayingBeforeIdle = true;
+      this.wasPlayingBeforeHidden = true;
       this.isPlaying = false;
       this.updateLiveIndicator();
     }
@@ -189,8 +181,8 @@ export class LiveNewsPanel extends Panel {
     }
   }
 
-  private resumeFromIdle(): void {
-    if (this.wasPlayingBeforeIdle && !this.isPlaying) {
+  private resumeFromHidden(): void {
+    if (this.wasPlayingBeforeHidden && !this.isPlaying) {
       this.isPlaying = true;
       this.updateLiveIndicator();
       // Reinitialize the player
@@ -456,17 +448,14 @@ export class LiveNewsPanel extends Panel {
   }
 
   public destroy(): void {
-    // Clear idle timeout
-    if (this.idleTimeout) {
-      clearTimeout(this.idleTimeout);
-      this.idleTimeout = null;
+    // Clear hidden timeout
+    if (this.hiddenTimeout) {
+      clearTimeout(this.hiddenTimeout);
+      this.hiddenTimeout = null;
     }
 
-    // Remove global event listeners
+    // Remove visibility listener
     document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
-      document.removeEventListener(event, this.boundIdleResetHandler);
-    });
 
     // Destroy YouTube player
     if (this.player) {
