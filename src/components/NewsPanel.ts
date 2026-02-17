@@ -41,9 +41,11 @@ export class NewsPanel extends Panel {
   private summaryContainer: HTMLElement | null = null;
   private currentHeadlines: string[] = [];
   private isSummarizing = false;
+  private panelTitle: string;
 
   constructor(id: string, title: string) {
     super({ id, title, showCount: true, trackActivity: true });
+    this.panelTitle = title;
     this.createDeviationIndicator();
     this.createSummarizeButton();
     this.setupActivityTracking();
@@ -137,7 +139,7 @@ export class NewsPanel extends Panel {
     if (this.currentHeadlines.length === 0) return;
 
     // Check cache first (include variant and version to bust old caches)
-    const cacheKey = `panel_summary_v2_${SITE_VARIANT}_${this.panelId}`;
+    const cacheKey = `panel_summary_v3_${SITE_VARIANT}_${this.panelId}`;
     const cached = this.getCachedSummary(cacheKey);
     if (cached) {
       this.showSummary(cached);
@@ -152,7 +154,9 @@ export class NewsPanel extends Panel {
     this.summaryContainer.innerHTML = '<div class="panel-summary-loading">Generating summary...</div>';
 
     try {
-      const result = await generateSummary(this.currentHeadlines.slice(0, 8));
+      // Send high priority headlines with panel context
+      const panelContext = `Panel: ${this.panelTitle}`;
+      const result = await generateSummary(this.currentHeadlines.slice(0, 15), undefined, panelContext);
       if (result?.summary) {
         this.setCachedSummary(cacheKey, result.summary);
         this.showSummary(result.summary);
@@ -258,6 +262,14 @@ export class NewsPanel extends Panel {
   private renderFlat(items: NewsItem[]): void {
     this.setCount(items.length);
 
+    // Store headlines sorted by threat priority (high priority first) for summarization
+    const prioritized = [...items].sort((a, b) => {
+      const pa = THREAT_PRIORITY[a.threat?.level ?? 'info'];
+      const pb = THREAT_PRIORITY[b.threat?.level ?? 'info'];
+      return pb - pa;
+    });
+    this.currentHeadlines = prioritized.map(i => i.title);
+
     const html = items
       .map(
         (item) => `
@@ -289,8 +301,8 @@ export class NewsPanel extends Panel {
     this.setCount(totalItems);
     this.relatedAssetContext.clear();
 
-    // Store headlines for summarization
-    this.currentHeadlines = sorted.slice(0, 10).map(c => c.primaryTitle);
+    // Store headlines for summarization (already sorted by threat priority)
+    this.currentHeadlines = sorted.map(c => c.primaryTitle);
 
     const clusterIds = sorted.map(c => c.id);
     let newItemIds: Set<string>;

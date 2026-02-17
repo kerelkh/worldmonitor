@@ -1,4 +1,4 @@
-import type { NewsItem, Monitor, PanelConfig, MapLayers, RelatedAsset, InternetOutage, SocialUnrestEvent, MilitaryFlight, MilitaryVessel, MilitaryFlightCluster, MilitaryVesselCluster } from '@/types';
+import type { Feed, NewsItem, Monitor, PanelConfig, MapLayers, RelatedAsset, InternetOutage, SocialUnrestEvent, MilitaryFlight, MilitaryVessel, MilitaryFlightCluster, MilitaryVesselCluster } from '@/types';
 import {
   FEEDS,
   INTEL_SOURCES,
@@ -1328,10 +1328,18 @@ export class App {
     this.map.initEscalationGetters();
 
     // Create all panels
-    const politicsPanel = new NewsPanel('politics', 'World / Geopolitical');
+    const politicsPanel = new NewsPanel('politics', SITE_VARIANT === 'polkam' ? 'World News' : 'World / Geopolitical');
     this.attachRelatedAssetHandlers(politicsPanel);
     this.newsPanels['politics'] = politicsPanel;
     this.panels['politics'] = politicsPanel;
+
+    // Indonesia panel (polkam variant)
+    if (SITE_VARIANT === 'polkam') {
+      const indonesiaPanel = new NewsPanel('indonesia', 'Berita Indonesia');
+      this.attachRelatedAssetHandlers(indonesiaPanel);
+      this.newsPanels['indonesia'] = indonesiaPanel;
+      this.panels['indonesia'] = indonesiaPanel;
+    }
 
     const techPanel = new NewsPanel('tech', 'Technology / AI');
     this.attachRelatedAssetHandlers(techPanel);
@@ -2380,6 +2388,7 @@ export class App {
   private async loadNews(): Promise<void> {
     // Build categories dynamically based on what feeds exist
     const allCategories = [
+      { key: 'indonesia', feeds: (FEEDS as Record<string, Feed[]>).indonesia },
       { key: 'politics', feeds: FEEDS.politics },
       { key: 'tech', feeds: FEEDS.tech },
       { key: 'finance', feeds: FEEDS.finance },

@@ -642,58 +642,71 @@ const TECH_FEEDS: Record<string, Feed[]> = {
 };
 
 // Polkam variant feeds (Indonesia-focused + global)
+// Google News helper for Indonesian language feeds
+const idNews = (query: string) => rss(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=id&gl=ID&ceid=ID:id`);
+const enNews = (query: string) => rss(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`);
+
 const POLKAM_FEEDS: Record<string, Feed[]> = {
+  indonesia: [
+    // Indonesian news (Bahasa Indonesia)
+    { name: 'Berita Terkini', url: idNews('Indonesia when:1d') },
+    { name: 'Kompas', url: idNews('site:kompas.com when:2d') },
+    { name: 'Detik News', url: idNews('site:detik.com when:2d') },
+    { name: 'CNN Indonesia', url: idNews('site:cnnindonesia.com when:2d') },
+    { name: 'Tempo', url: idNews('site:tempo.co when:2d') },
+    { name: 'Antara', url: idNews('site:antaranews.com when:2d') },
+    { name: 'Republika', url: idNews('site:republika.co.id when:2d') },
+    { name: 'Tribunnews', url: idNews('site:tribunnews.com when:2d') },
+    { name: 'Jakarta Post', url: enNews('site:thejakartapost.com when:2d') },
+  ],
   politics: [
-    // Indonesian news (English editions)
-    { name: 'Jakarta Post', url: rss('https://news.google.com/rss/search?q=site:thejakartapost.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Tempo English', url: rss('https://news.google.com/rss/search?q=site:en.tempo.co+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Kompas English', url: rss('https://news.google.com/rss/search?q=site:english.kompas.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Antara News', url: rss('https://news.google.com/rss/search?q=site:en.antaranews.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'CNN Indonesia', url: rss('https://news.google.com/rss/search?q=site:cnnindonesia.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Detik News', url: rss('https://news.google.com/rss/search?q=site:detik.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Indonesia News', url: rss('https://news.google.com/rss/search?q=Indonesia+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    // Global
+    // World / Geopolitical news
     { name: 'BBC World', url: rss('https://feeds.bbci.co.uk/news/world/rss.xml') },
-    { name: 'Reuters World', url: rss('https://news.google.com/rss/search?q=site:reuters.com+world&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'AP News', url: rss('https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Reuters', url: enNews('site:reuters.com world when:2d') },
+    { name: 'Al Jazeera', url: rss('https://www.aljazeera.com/xml/rss/all.xml') },
+    { name: 'AP News', url: enNews('site:apnews.com world when:2d') },
+    { name: 'France 24', url: rss('https://www.france24.com/en/rss') },
   ],
   asia: [
+    // ASEAN & Asia in Bahasa
+    { name: 'ASEAN Indonesia', url: idNews('(ASEAN OR "Asia Tenggara") when:3d') },
+    { name: 'Berita Asia', url: idNews('(China OR Jepang OR Korea OR India OR ASEAN) when:2d') },
+    { name: 'Diplomasi RI', url: idNews('(diplomasi OR "luar negeri" OR "kementerian luar negeri" OR Retno) when:3d') },
+    // English
     { name: 'BBC Asia', url: rss('https://feeds.bbci.co.uk/news/world/asia/rss.xml') },
     { name: 'South China Morning Post', url: railwayRss('https://www.scmp.com/rss/91/feed/') },
-    { name: 'Reuters Asia', url: rss('https://news.google.com/rss/search?q=site:reuters.com+(China+OR+Japan+OR+Taiwan+OR+Korea)+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'ASEAN News', url: rss('https://news.google.com/rss/search?q=(ASEAN+OR+"Southeast+Asia")+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Indonesia ASEAN', url: rss('https://news.google.com/rss/search?q=Indonesia+(ASEAN+OR+diplomacy+OR+"foreign+policy")+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Asia Pacific', url: rss('https://news.google.com/rss/search?q=(China+OR+Japan+OR+Korea+OR+India+OR+ASEAN)+when:2d&hl=en-US&gl=US&ceid=US:en') },
     { name: 'The Diplomat', url: rss('https://thediplomat.com/feed/') },
+    { name: 'Asia Pacific', url: enNews('(China OR Japan OR Korea OR Taiwan OR ASEAN) when:2d') },
   ],
   finance: [
-    // Indonesian markets
-    { name: 'Indonesia Finance', url: rss('https://news.google.com/rss/search?q=(IDX+OR+IHSG+OR+"Indonesia+stock"+OR+Rupiah+OR+"Bank+Indonesia")+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Bisnis Indonesia', url: rss('https://news.google.com/rss/search?q=site:bisnis.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Kontan', url: rss('https://news.google.com/rss/search?q=site:kontan.co.id+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    // Indonesian finance (Bahasa)
+    { name: 'IHSG & Saham', url: idNews('(IHSG OR saham OR "Bursa Efek" OR IDX) when:2d') },
+    { name: 'Rupiah & BI', url: idNews('(Rupiah OR "Bank Indonesia" OR "suku bunga" OR inflasi) when:3d') },
+    { name: 'Bisnis Indonesia', url: idNews('site:bisnis.com when:2d') },
+    { name: 'Kontan', url: idNews('site:kontan.co.id when:2d') },
+    { name: 'Ekonomi RI', url: idNews('(ekonomi OR APBN OR "pertumbuhan ekonomi" OR ekspor OR impor) Indonesia when:3d') },
     // Global
     { name: 'CNBC', url: rss('https://www.cnbc.com/id/100003114/device/rss/rss.html') },
-    { name: 'Reuters Business', url: rss('https://news.google.com/rss/search?q=site:reuters.com+business+markets&hl=en-US&gl=US&ceid=US:en') },
     { name: 'MarketWatch', url: rss('https://feeds.marketwatch.com/marketwatch/topstories') },
-    { name: 'Yahoo Finance', url: rss('https://finance.yahoo.com/news/rssindex') },
+    { name: 'Reuters Business', url: enNews('site:reuters.com business markets when:2d') },
   ],
   energy: [
-    // Indonesian energy
-    { name: 'Indonesia Energy', url: rss('https://news.google.com/rss/search?q=(Pertamina+OR+"Indonesia+oil"+OR+"Indonesia+gas"+OR+"Indonesia+coal"+OR+"Indonesia+mining")+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Palm Oil', url: rss('https://news.google.com/rss/search?q=("palm+oil"+OR+CPO+OR+"crude+palm+oil"+Indonesia)+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Indonesia LNG', url: rss('https://news.google.com/rss/search?q=(LNG+OR+"liquefied+natural+gas"+Indonesia)+when:7d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Indonesia Mining', url: rss('https://news.google.com/rss/search?q=(nickel+OR+tin+OR+bauxite+OR+copper+Indonesia+mining)+when:7d&hl=en-US&gl=US&ceid=US:en') },
+    // Indonesian energy (Bahasa)
+    { name: 'Energi Indonesia', url: idNews('(Pertamina OR PLN OR "energi" OR "minyak bumi" OR "gas alam" OR batubara) when:3d') },
+    { name: 'Sawit & CPO', url: idNews('(sawit OR CPO OR "kelapa sawit" OR "minyak sawit") when:3d') },
+    { name: 'Tambang & Nikel', url: idNews('(nikel OR timah OR bauksit OR tembaga OR "tambang" OR Freeport) Indonesia when:3d') },
+    { name: 'Minerba', url: idNews('(ESDM OR minerba OR "energi terbarukan" OR "listrik") Indonesia when:7d') },
     // Global energy
-    { name: 'Oil & Gas', url: rss('https://news.google.com/rss/search?q=(oil+price+OR+OPEC+OR+"natural+gas"+OR+pipeline+OR+LNG)+when:2d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Reuters Energy', url: rss('https://news.google.com/rss/search?q=site:reuters.com+(oil+OR+gas+OR+energy+OR+OPEC)+when:3d&hl=en-US&gl=US&ceid=US:en') },
-    { name: 'Mining & Resources', url: rss('https://news.google.com/rss/search?q=(lithium+OR+"rare+earth"+OR+cobalt+OR+mining)+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Oil & Gas', url: enNews('(oil price OR OPEC OR "natural gas" OR LNG) when:2d') },
+    { name: 'Reuters Energy', url: enNews('site:reuters.com (oil OR gas OR energy OR OPEC) when:3d') },
+    { name: 'Mining Global', url: enNews('(nickel OR coal OR copper OR "rare earth" mining) when:3d') },
   ],
 };
 
 // Variant-aware exports
 export const FEEDS = SITE_VARIANT === 'tech' ? TECH_FEEDS : SITE_VARIANT === 'polkam' ? POLKAM_FEEDS : FULL_FEEDS;
 
-export const INTEL_SOURCES: Feed[] = [
+const FULL_INTEL_SOURCES: Feed[] = [
   // Defense & Security (Tier 1)
   { name: 'Defense One', url: rss('https://www.defenseone.com/rss/all/'), type: 'defense' },
   { name: 'Breaking Defense', url: rss('https://breakingdefense.com/feed/'), type: 'defense' },
@@ -724,6 +737,36 @@ export const INTEL_SOURCES: Feed[] = [
   // Economic & Food Security (Tier 2)
   { name: 'FAO News', url: rss('https://www.fao.org/rss/home/en/'), type: 'economic' },
 ];
+
+const POLKAM_INTEL_SOURCES: Feed[] = [
+  // Indonesia Defense & Security (Bahasa)
+  { name: 'TNI & Militer', url: idNews('(TNI OR militer OR "pertahanan" OR "Kementerian Pertahanan" OR Prabowo) when:3d'), type: 'defense' },
+  { name: 'Polri & Keamanan', url: idNews('(Polri OR kepolisian OR "keamanan nasional" OR terorisme OR Densus) when:3d'), type: 'defense' },
+  { name: 'BIN & Intelijen', url: idNews('(BIN OR intelijen OR "badan intelijen" OR "keamanan negara") when:7d'), type: 'defense' },
+  { name: 'Separatisme & Konflik', url: idNews('(OPM OR Papua OR separatis OR konflik OR "keamanan dalam negeri") when:7d'), type: 'defense' },
+  { name: 'Terorisme', url: idNews('(terorisme OR teroris OR BNPT OR radikalisme OR deradikalisasi) Indonesia when:7d'), type: 'defense' },
+  { name: 'Pertahanan RI', url: idNews('(alutsista OR "kapal perang" OR "jet tempur" OR "rudal" OR "radar") Indonesia when:7d'), type: 'defense' },
+
+  // Indonesia Geopolitics & Diplomacy (Bahasa)
+  { name: 'Politik Luar Negeri', url: idNews('("politik luar negeri" OR "hubungan bilateral" OR "kedaulatan" OR "Laut China Selatan" OR Natuna) when:3d'), type: 'intl' },
+  { name: 'Laut China Selatan', url: idNews('("Laut China Selatan" OR Natuna OR "ZEE" OR "zona ekonomi eksklusif" OR "kapal asing") when:7d'), type: 'intl' },
+
+  // Indonesia Intel (English)
+  { name: 'Indonesia Security', url: enNews('(Indonesia military OR Indonesia defense OR TNI OR "Indonesian navy") when:3d'), type: 'defense' },
+  { name: 'South China Sea', url: enNews('("South China Sea" OR Natuna OR Indonesia maritime) when:7d'), type: 'intl' },
+
+  // Regional think tanks & research
+  { name: 'CSIS Indonesia', url: enNews('(site:csis.or.id OR "CSIS Jakarta" OR "CSIS Indonesia") when:7d'), type: 'research' },
+  { name: 'Lowy Institute', url: rss('https://www.lowyinstitute.org/the-interpreter/rss.xml'), type: 'research' },
+  { name: 'ISEAS', url: enNews('(site:iseas.edu.sg Indonesia OR "ISEAS" Southeast Asia) when:7d'), type: 'research' },
+
+  // Global intel (keep key sources)
+  { name: 'Defense One', url: rss('https://www.defenseone.com/rss/all/'), type: 'defense' },
+  { name: 'Bellingcat', url: rss('https://www.bellingcat.com/feed/'), type: 'osint' },
+  { name: 'Foreign Policy', url: rss('https://foreignpolicy.com/feed/'), type: 'intl' },
+];
+
+export const INTEL_SOURCES: Feed[] = SITE_VARIANT === 'polkam' ? POLKAM_INTEL_SOURCES : FULL_INTEL_SOURCES;
 
 // Keywords that trigger alert status - must be specific to avoid false positives
 export const ALERT_KEYWORDS = [

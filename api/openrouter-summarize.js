@@ -33,7 +33,7 @@ const CACHE_VERSION = 'v3';
 
 // Generate cache key from headlines, geoContext, and variant (same as groq endpoint)
 function getCacheKey(headlines, mode, geoContext = '', variant = 'full') {
-  const sorted = headlines.slice(0, 8).sort().join('|');
+  const sorted = headlines.slice(0, 15).sort().join('|');
   const geoHash = geoContext ? ':g' + hashString(geoContext).slice(0, 6) : '';
   const hash = hashString(`${mode}:${sorted}`);
   // Include variant and version to prevent cross-site cache collisions
@@ -136,7 +136,7 @@ export default async function handler(request) {
     }
 
     // Deduplicate similar headlines (same story from different sources)
-    const uniqueHeadlines = deduplicateHeadlines(headlines.slice(0, 8));
+    const uniqueHeadlines = deduplicateHeadlines(headlines.slice(0, 15));
     const headlineText = uniqueHeadlines.map((h, i) => `${i + 1}. ${h}`).join('\n');
 
     let systemPrompt, userPrompt;
@@ -146,64 +146,85 @@ export default async function handler(request) {
 
     // Current date context for LLM (models may have outdated knowledge)
     const isTechVariant = variant === 'tech';
+    const isPolkamVariant = variant === 'polkam';
     const dateContext = `Current date: ${new Date().toISOString().split('T')[0]}.${isTechVariant ? '' : ' Donald Trump is the current US President (second term, inaugurated Jan 2025).'}`;
 
     if (mode === 'brief') {
       if (isTechVariant) {
-        // Tech variant: focus on startups, AI, funding, product launches
         systemPrompt = `${dateContext}
 
-Summarize the key tech/startup development in 2-3 sentences.
+You receive news headlines from a specific panel/category. Summarize the key development in 2-3 sentences.
 Rules:
 - Focus ONLY on technology, startups, AI, funding, product launches, or developer news
-- IGNORE political news, trade policy, tariffs, government actions unless directly about tech regulation
 - Lead with the company/product/technology name
 - Start directly: "OpenAI announced...", "A new $50M Series B...", "GitHub released..."
 - No bullet points, no meta-commentary`;
+      } else if (isPolkamVariant) {
+        systemPrompt = `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.
+
+Kamu menerima judul berita dari panel/kategori tertentu. Rangkum perkembangan utama dalam 2-3 kalimat dalam Bahasa Indonesia.
+Aturan:
+- SELALU tulis dalam Bahasa Indonesia
+- Fokus pada topik yang relevan dengan kategori panel
+- Mulai langsung dengan subjek: "Pemerintah Indonesia...", "TNI...", "Bank Indonesia..."
+- Sebutkan aktor utama dan lokasi secara spesifik
+- Jika ada berita internasional, jelaskan dampaknya terhadap Indonesia
+- Tidak ada bullet point, tidak ada meta-komentar`;
       } else {
-        // Full variant: geopolitical focus
         systemPrompt = `${dateContext}
 
-Summarize the key development in 2-3 sentences.
+You receive news headlines from a specific panel/category. Summarize the key development in 2-3 sentences.
 Rules:
 - Lead with WHAT happened and WHERE - be specific
-- NEVER start with "Breaking news", "Good evening", "Tonight", or TV-style openings
 - Start directly with the subject: "Iran's regime...", "The US Treasury...", "Protests in..."
-- CRITICAL FOCAL POINTS are the main actors - mention them by name
-- If focal points show news + signals convergence, that's the lead
+- Mention key actors by name
 - No bullet points, no meta-commentary`;
       }
-      userPrompt = `Summarize the top story:\n${headlineText}${intelSection}`;
+      userPrompt = isPolkamVariant
+        ? `Rangkum berita utama berikut:\n${headlineText}${intelSection}`
+        : `Summarize the top stories:\n${headlineText}${intelSection}`;
     } else if (mode === 'analysis') {
       if (isTechVariant) {
         systemPrompt = `${dateContext}
 
-Analyze the tech/startup trend in 2-3 sentences.
+You receive news headlines from a specific panel/category. Analyze the trend in 2-3 sentences.
 Rules:
-- Focus ONLY on technology implications: funding trends, AI developments, market shifts, product strategy
-- IGNORE political implications, trade wars, government unless directly about tech policy
+- Focus on technology implications: funding trends, AI developments, market shifts
 - Lead with the insight for tech industry
 - Connect to startup ecosystem, VC trends, or technical implications`;
+      } else if (isPolkamVariant) {
+        systemPrompt = `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.
+
+Kamu menerima judul berita dari panel/kategori tertentu. Berikan analisis dalam 2-3 kalimat dalam Bahasa Indonesia.
+Aturan:
+- SELALU tulis dalam Bahasa Indonesia
+- Mulai dengan insight utama - apa yang signifikan dan mengapa
+- Fokus pada dampak terhadap Indonesia: keamanan, ekonomi, geopolitik
+- Hubungkan dengan kepentingan nasional Indonesia`;
       } else {
         systemPrompt = `${dateContext}
 
-Provide analysis in 2-3 sentences. Be direct and specific.
+You receive news headlines from a specific panel/category. Provide analysis in 2-3 sentences.
 Rules:
 - Lead with the insight - what's significant and why
-- NEVER start with "Breaking news", "Tonight", "The key/dominant narrative is"
 - Start with substance: "Iran faces...", "The escalation in...", "Multiple signals suggest..."
-- CRITICAL FOCAL POINTS are your main actors - explain WHY they matter
-- If focal points show news-signal correlation, flag as escalation
+- Explain WHY the key actors matter
 - Connect dots, be specific about implications`;
       }
       userPrompt = isTechVariant
-        ? `What's the key tech trend or development?\n${headlineText}${intelSection}`
+        ? `What's the key tech trend?\n${headlineText}${intelSection}`
+        : isPolkamVariant
+        ? `Apa pola atau risiko utama?\n${headlineText}${intelSection}`
         : `What's the key pattern or risk?\n${headlineText}${intelSection}`;
     } else {
       systemPrompt = isTechVariant
-        ? `${dateContext}\n\nSynthesize tech news in 2 sentences. Focus on startups, AI, funding, products. Ignore politics unless directly about tech regulation.`
-        : `${dateContext}\n\nSynthesize in 2 sentences max. Lead with substance. NEVER start with "Breaking news" or "Tonight" - just state the insight directly. CRITICAL focal points with news-signal convergence are significant.`;
-      userPrompt = `Key takeaway:\n${headlineText}${intelSection}`;
+        ? `${dateContext}\n\nSynthesize these tech headlines in 2 sentences. Focus on startups, AI, funding, products.`
+        : isPolkamVariant
+        ? `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.\n\nSintesis judul berita berikut dalam 2 kalimat dalam Bahasa Indonesia. Fokus pada dampak terhadap Indonesia.`
+        : `${dateContext}\n\nSynthesize these headlines in 2 sentences. Lead with substance.`;
+      userPrompt = isPolkamVariant
+        ? `Kesimpulan utama:\n${headlineText}${intelSection}`
+        : `Key takeaway:\n${headlineText}${intelSection}`;
     }
 
     const response = await fetch(OPENROUTER_API_URL, {
@@ -221,7 +242,7 @@ Rules:
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.3,
-        max_tokens: 150,
+        max_tokens: 200,
         top_p: 0.9,
       }),
     });

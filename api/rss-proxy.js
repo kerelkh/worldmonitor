@@ -19,6 +19,7 @@ const ALLOWED_DOMAINS = [
   'feeds.npr.org',
   'news.google.com',
   'www.aljazeera.com',
+  'www.france24.com',
   'rss.cnn.com',
   'hnrss.org',
   'feeds.arstechnica.com',

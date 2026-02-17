@@ -103,6 +103,162 @@ function htmlVariantPlugin(): Plugin {
   };
 }
 
+function rssProxyDevPlugin(): Plugin {
+  return {
+    name: 'rss-proxy-dev',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith('/api/rss-proxy')) {
+          return next();
+        }
+
+        const url = new URL(req.url, 'http://localhost');
+        const feedUrl = url.searchParams.get('url');
+
+        if (!feedUrl) {
+          res.statusCode = 400;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Missing url parameter' }));
+          return;
+        }
+
+        try {
+          const response = await fetch(feedUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+              'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+            },
+          });
+
+          const data = await response.text();
+          res.statusCode = response.status;
+          res.setHeader('Content-Type', 'application/xml');
+          res.setHeader('Cache-Control', 'public, max-age=300');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(data);
+        } catch {
+          res.statusCode = 502;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Failed to fetch feed' }));
+        }
+      });
+    },
+  };
+}
+
+function groqSummarizeDevPlugin(): Plugin {
+  return {
+    name: 'groq-summarize-dev',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith('/api/groq-summarize')) {
+          return next();
+        }
+
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Method not allowed' }));
+          return;
+        }
+
+        const apiKey = process.env.GROQ_API_KEY;
+        if (!apiKey) {
+          res.statusCode = 503;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Groq API key not configured', fallback: true }));
+          return;
+        }
+
+        try {
+          // Read request body
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) {
+            chunks.push(Buffer.from(chunk));
+          }
+          const body = JSON.parse(Buffer.concat(chunks).toString());
+          const { headlines, mode = 'brief', geoContext = '', variant = 'full' } = body;
+
+          if (!headlines || !Array.isArray(headlines) || headlines.length === 0) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Headlines array required' }));
+            return;
+          }
+
+          const headlineText = headlines.slice(0, 15).map((h: string, i: number) => `${i + 1}. ${h}`).join('\n');
+          const intelSection = geoContext ? `\n\n${geoContext}` : '';
+          const isTechVariant = variant === 'tech';
+          const isPolkamVariant = variant === 'polkam';
+          const dateContext = `Current date: ${new Date().toISOString().split('T')[0]}.${isTechVariant ? '' : ' Donald Trump is the current US President (second term, inaugurated Jan 2025).'}`;
+
+          let systemPrompt: string, userPrompt: string;
+
+          if (mode === 'brief') {
+            if (isPolkamVariant) {
+              systemPrompt = `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.\n\nKamu menerima judul berita dari panel/kategori tertentu. Rangkum perkembangan utama dalam 2-3 kalimat dalam Bahasa Indonesia.\nAturan:\n- SELALU tulis dalam Bahasa Indonesia\n- Fokus pada topik yang relevan dengan kategori panel\n- Mulai langsung dengan subjek\n- Tidak ada bullet point`;
+            } else if (isTechVariant) {
+              systemPrompt = `${dateContext}\n\nYou receive news headlines from a specific panel/category. Summarize the key development in 2-3 sentences. Focus on technology, startups, AI, funding.`;
+            } else {
+              systemPrompt = `${dateContext}\n\nYou receive news headlines from a specific panel/category. Summarize the key development in 2-3 sentences. Lead with WHAT happened and WHERE. No bullet points.`;
+            }
+            userPrompt = isPolkamVariant ? `Rangkum berita utama berikut:\n${headlineText}${intelSection}` : `Summarize the top stories:\n${headlineText}${intelSection}`;
+          } else if (mode === 'analysis') {
+            if (isPolkamVariant) {
+              systemPrompt = `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.\n\nKamu menerima judul berita dari panel/kategori tertentu. Berikan analisis dalam 2-3 kalimat dalam Bahasa Indonesia.\nAturan:\n- SELALU tulis dalam Bahasa Indonesia\n- Fokus pada dampak terhadap Indonesia: keamanan, ekonomi, geopolitik`;
+            } else if (isTechVariant) {
+              systemPrompt = `${dateContext}\n\nYou receive news headlines from a specific panel/category. Analyze the trend in 2-3 sentences.`;
+            } else {
+              systemPrompt = `${dateContext}\n\nYou receive news headlines from a specific panel/category. Provide analysis in 2-3 sentences. Be direct and specific.`;
+            }
+            userPrompt = isPolkamVariant ? `Apa pola atau risiko utama?\n${headlineText}${intelSection}` : isTechVariant ? `What's the key tech trend?\n${headlineText}${intelSection}` : `What's the key pattern or risk?\n${headlineText}${intelSection}`;
+          } else {
+            systemPrompt = isPolkamVariant
+              ? `${dateContext} Prabowo Subianto adalah Presiden Indonesia saat ini.\n\nSintesis judul berita berikut dalam 2 kalimat dalam Bahasa Indonesia. Fokus pada dampak terhadap Indonesia.`
+              : `${dateContext}\n\nSynthesize these headlines in 2 sentences. Lead with substance.`;
+            userPrompt = isPolkamVariant ? `Kesimpulan utama:\n${headlineText}${intelSection}` : `Key takeaway:\n${headlineText}${intelSection}`;
+          }
+
+          const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-8b-instant',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt },
+              ],
+              temperature: 0.3,
+              max_tokens: 200,
+            }),
+          });
+
+          if (!groqResponse.ok) {
+            res.statusCode = groqResponse.status;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Groq API error', fallback: true }));
+            return;
+          }
+
+          const data = await groqResponse.json() as any;
+          const summary = data.choices?.[0]?.message?.content?.trim();
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ summary, model: 'llama-3.1-8b-instant', provider: 'groq', cached: false }));
+        } catch {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Groq summarize error', fallback: true }));
+        }
+      });
+    },
+  };
+}
+
 function finnhubDevPlugin(): Plugin {
   return {
     name: 'finnhub-dev',
@@ -240,7 +396,7 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
-  plugins: [htmlVariantPlugin(), finnhubDevPlugin(), yahooFinanceDevPlugin(), youtubeLivePlugin()],
+  plugins: [htmlVariantPlugin(), rssProxyDevPlugin(), groqSummarizeDevPlugin(), finnhubDevPlugin(), yahooFinanceDevPlugin(), youtubeLivePlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
