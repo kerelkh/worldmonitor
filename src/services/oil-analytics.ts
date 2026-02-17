@@ -85,6 +85,7 @@ export async function fetchOilAnalytics(): Promise<OilAnalytics> {
       }
       throw new Error(`EIA API error: ${response.status}`);
     }
+    console.log('EIA API response:', await response.text());
 
     const data = await response.json();
 

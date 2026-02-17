@@ -51,6 +51,26 @@ const VARIANT_META: Record<string, {
       'Service status monitoring',
     ],
   },
+  polkam: {
+    title: 'Polkam Monitor - Indonesia Intelligence Dashboard',
+    description: 'Real-time Indonesia intelligence and geopolitical monitoring dashboard with live news, economic indicators, energy tracking, and Asia-Pacific analysis.',
+    keywords: 'Indonesia intelligence, polkam, geopolitical dashboard, Indonesia news, ASEAN, Asia-Pacific, Indonesian economy, energy monitoring, commodities, Jakarta, Southeast Asia, real-time monitoring',
+    url: 'https://polkam.worldmonitor.app/',
+    siteName: 'Polkam Monitor',
+    features: [
+      'Indonesia news aggregation',
+      'Live Indonesian TV channels',
+      'AI-powered insights',
+      'Intel feed monitoring',
+      'Asia-Pacific analysis',
+      'Indonesian economic indicators',
+      'Energy & resources tracking',
+      'Commodities monitoring',
+      'Market tracking',
+      'Financial news',
+      'Geopolitical map',
+    ],
+  },
 };
 
 function htmlVariantPlugin(): Plugin {
@@ -79,6 +99,103 @@ function htmlVariantPlugin(): Plugin {
         .replace(/"url": "https:\/\/worldmonitor\.app\/"/, `"url": "${meta.url}"`)
         .replace(/"description": "Real-time global intelligence dashboard with live news, markets, military tracking, infrastructure monitoring, and geopolitical data."/, `"description": "${meta.description}"`)
         .replace(/"featureList": \[[\s\S]*?\]/, `"featureList": ${JSON.stringify(meta.features, null, 8).replace(/\n/g, '\n      ')}`);
+    },
+  };
+}
+
+function finnhubDevPlugin(): Plugin {
+  return {
+    name: 'finnhub-dev',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith('/api/finnhub')) {
+          return next();
+        }
+
+        const apiKey = process.env.FINNHUB_API_KEY;
+        if (!apiKey) {
+          res.statusCode = 503;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Finnhub API key not configured' }));
+          return;
+        }
+
+        try {
+          const url = new URL(req.url, 'http://localhost');
+          const symbolsParam = url.searchParams.get('symbols');
+          if (!symbolsParam) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Missing symbols parameter' }));
+            return;
+          }
+
+          const symbols = symbolsParam.split(',').map(s => s.trim().toUpperCase()).filter(s => /^[A-Za-z0-9.^]+$/.test(s)).slice(0, 20);
+          const quotes = await Promise.all(
+            symbols.map(async (symbol) => {
+              try {
+                const resp = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`);
+                if (!resp.ok) return { symbol, error: `HTTP ${resp.status}` };
+                const data = await resp.json();
+                if (data.c === 0 && data.h === 0 && data.l === 0) return { symbol, error: 'No data' };
+                return { symbol, price: data.c, change: data.d, changePercent: data.dp, high: data.h, low: data.l, open: data.o, previousClose: data.pc, timestamp: data.t };
+              } catch {
+                return { symbol, error: 'Fetch failed' };
+              }
+            })
+          );
+
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'public, max-age=30');
+          res.end(JSON.stringify({ quotes }));
+        } catch (error) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Failed to fetch data' }));
+        }
+      });
+    },
+  };
+}
+
+function yahooFinanceDevPlugin(): Plugin {
+  return {
+    name: 'yahoo-finance-dev',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith('/api/yahoo-finance')) {
+          return next();
+        }
+
+        try {
+          const url = new URL(req.url, 'http://localhost');
+          const symbol = url.searchParams.get('symbol')?.trim().toUpperCase();
+          if (!symbol || !/^[A-Za-z0-9.^=\-]+$/.test(symbol)) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Invalid or missing symbol' }));
+            return;
+          }
+
+          const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`;
+          const response = await fetch(yahooUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          });
+
+          const data = await response.text();
+          res.statusCode = response.status;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Cache-Control', 'public, max-age=60');
+          res.end(data);
+        } catch (error) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Failed to fetch data' }));
+        }
+      });
     },
   };
 }
@@ -123,7 +240,7 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
-  plugins: [htmlVariantPlugin(), youtubeLivePlugin()],
+  plugins: [htmlVariantPlugin(), finnhubDevPlugin(), yahooFinanceDevPlugin(), youtubeLivePlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

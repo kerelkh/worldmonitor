@@ -154,6 +154,15 @@ const ALLOWED_DOMAINS = [
   'www.imf.org',
   // Additional
   'news.ycombinator.com',
+  // Indonesian news (Polkam variant)
+  'www.thejakartapost.com',
+  'en.tempo.co',
+  'english.kompas.com',
+  'en.antaranews.com',
+  'www.cnnindonesia.com',
+  'www.detik.com',
+  'www.bisnis.com',
+  'www.kontan.co.id',
 ];
 
 // CORS helper - allow worldmonitor.app and Vercel preview domains

@@ -196,11 +196,29 @@ const TECH_MOBILE_MAP_LAYERS: MapLayers = {
 };
 
 // ============================================
+// POLKAM VARIANT (Indonesia Intelligence)
+// ============================================
+const POLKAM_PANELS: Record<string, PanelConfig> = {
+  map: { name: 'Global Map', enabled: true, priority: 1 },
+  'live-news': { name: 'Live News', enabled: true, priority: 1 },
+  insights: { name: 'AI Insights', enabled: true, priority: 1 },
+  intel: { name: 'Intel Feed', enabled: true, priority: 1 },
+  politics: { name: 'Indonesia & World News', enabled: true, priority: 1 },
+  asia: { name: 'Asia-Pacific', enabled: true, priority: 1 },
+  economic: { name: 'Economic Indicators', enabled: true, priority: 1 },
+  energy: { name: 'Energy & Resources', enabled: true, priority: 1 },
+  markets: { name: 'Markets', enabled: true, priority: 1 },
+  commodities: { name: 'Commodities', enabled: true, priority: 1 },
+  finance: { name: 'Financial', enabled: true, priority: 1 },
+  monitors: { name: 'My Monitors', enabled: true, priority: 2 },
+};
+
+// ============================================
 // VARIANT-AWARE EXPORTS
 // ============================================
-export const DEFAULT_PANELS = SITE_VARIANT === 'tech' ? TECH_PANELS : FULL_PANELS;
-export const DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MAP_LAYERS : FULL_MAP_LAYERS;
-export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MOBILE_MAP_LAYERS : FULL_MOBILE_MAP_LAYERS;
+export const DEFAULT_PANELS = SITE_VARIANT === 'tech' ? TECH_PANELS : SITE_VARIANT === 'polkam' ? POLKAM_PANELS : FULL_PANELS;
+export const DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MAP_LAYERS : FULL_MAP_LAYERS; // polkam uses same as full
+export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'tech' ? TECH_MOBILE_MAP_LAYERS : FULL_MOBILE_MAP_LAYERS; // polkam uses same as full
 
 export const MONITOR_COLORS = [
   '#44ff88',

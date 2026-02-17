@@ -79,12 +79,14 @@ export interface Commodity {
   symbol: string;
   name: string;
   display: string;
+  currency?: string;
 }
 
 export interface MarketSymbol {
   symbol: string;
   name: string;
   display: string;
+  currency?: string;
 }
 
 export interface MarketData {
@@ -93,6 +95,7 @@ export interface MarketData {
   display: string;
   price: number | null;
   change: number | null;
+  currency?: string;
 }
 
 export interface CryptoData {

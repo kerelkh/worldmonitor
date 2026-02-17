@@ -1492,7 +1492,7 @@ export class App {
     this.panels['energy'] = energyPanel;
 
     // Geopolitical-only panels (not needed for tech variant)
-    if (SITE_VARIANT === 'full') {
+    if (SITE_VARIANT !== 'tech') {
       const gdeltIntelPanel = new GdeltIntelPanel();
       this.panels['gdelt-intel'] = gdeltIntelPanel;
 
@@ -2155,15 +2155,15 @@ export class App {
     ];
 
     // Load intelligence signals for CII calculation (protests, military, outages)
-    // Only for geopolitical variant - tech variant doesn't need CII/focal points
-    if (SITE_VARIANT === 'full') {
+    // Only for geopolitical variants - tech variant doesn't need CII/focal points
+    if (SITE_VARIANT !== 'tech') {
       tasks.push({ name: 'intelligence', task: runGuarded('intelligence', () => this.loadIntelligenceSignals()) });
     }
 
     // Conditionally load non-intelligence layers
     // NOTE: outages, protests, military are handled by loadIntelligenceSignals() above
     // They update the map when layers are enabled, so no duplicate tasks needed here
-    if (SITE_VARIANT === 'full') tasks.push({ name: 'firms', task: runGuarded('firms', () => this.loadFirmsData()) });
+    if (SITE_VARIANT !== 'tech') tasks.push({ name: 'firms', task: runGuarded('firms', () => this.loadFirmsData()) });
     if (this.mapLayers.natural) tasks.push({ name: 'natural', task: runGuarded('natural', () => this.loadNatural()) });
     if (this.mapLayers.weather) tasks.push({ name: 'weather', task: runGuarded('weather', () => this.loadWeatherAlerts()) });
     if (this.mapLayers.ais) tasks.push({ name: 'ais', task: runGuarded('ais', () => this.loadAisSignals()) });
@@ -2426,8 +2426,8 @@ export class App {
       }
     });
 
-    // Intel (uses different source) - full variant only (defense/military news)
-    if (SITE_VARIANT === 'full') {
+    // Intel (uses different source) - geopolitical variants only (defense/military news)
+    if (SITE_VARIANT !== 'tech') {
       const enabledIntelSources = INTEL_SOURCES.filter(f => !this.disabledSources.has(f.name));
       const intelPanel = this.newsPanels['intel'];
       if (enabledIntelSources.length === 0) {
@@ -2532,12 +2532,13 @@ export class App {
               display: c.display,
               price: c.price,
               change: c.change,
+              currency: c.currency,
             }))
           );
         },
       });
       (this.panels['commodities'] as CommoditiesPanel).renderCommodities(
-        commodities.map((c) => ({ display: c.display, price: c.price, change: c.change }))
+        commodities.map((c) => ({ display: c.display, price: c.price, change: c.change, currency: c.currency }))
       );
     } catch {
       this.statusPanel?.updateApi('Finnhub', { status: 'error' });
@@ -3340,9 +3341,9 @@ export class App {
     this.scheduleRefresh('oil', () => this.loadOilAnalytics(), 30 * 60 * 1000);
     this.scheduleRefresh('spending', () => this.loadGovernmentSpending(), 60 * 60 * 1000);
 
-    // Refresh intelligence signals for CII (geopolitical variant only)
+    // Refresh intelligence signals for CII (geopolitical variants only)
     // This handles outages, protests, military - updates map when layers enabled
-    if (SITE_VARIANT === 'full') {
+    if (SITE_VARIANT !== 'tech') {
       this.scheduleRefresh('intelligence', () => {
         this.intelligenceCache = {}; // Clear cache to force fresh fetch
         return this.loadIntelligenceSignals();

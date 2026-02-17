@@ -64,10 +64,22 @@ export default async function handler(req) {
   if (path === '/petroleum') {
     try {
       const series = {
-        wti: 'PET.RWTC.W',
-        brent: 'PET.RBRTE.W',
-        production: 'PET.WCRFPUS2.W',
-        inventory: 'PET.WCESTUS1.W',
+        wti: {
+          route: 'pri',
+          facet: { product: 'EPCWTI' }
+        },
+        brent: {
+          route: 'pri',
+          facet: { product: 'EPCBRENT' }
+        },
+        production: {
+          route: 'crd',
+          facet: { product: 'CRFPUS2' }
+        },
+        inventory: {
+          route: 'stoc',
+          facet: { product: 'CESTUS1' }
+        }
       };
 
       const results = {};
@@ -76,13 +88,14 @@ export default async function handler(req) {
       const fetchPromises = Object.entries(series).map(async ([key, seriesId]) => {
         try {
           const response = await fetch(
-            `https://api.eia.gov/v2/seriesid/${seriesId}?api_key=${apiKey}&num=2`,
+            `https://api.eia.gov/v2/petroleum/${seriesId.route}?api_key=${apiKey}&num=2`,
             { headers: { 'Accept': 'application/json' } }
           );
 
           if (!response.ok) return null;
 
           const data = await response.json();
+          console.log(data);
           const values = data?.response?.data || [];
 
           if (values.length >= 1) {

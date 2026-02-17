@@ -8,7 +8,13 @@ export function formatTime(date: Date): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-export function formatPrice(price: number): string {
+export function formatPrice(price: number, currency?: string): string {
+  if (currency === 'IDR') {
+    return `Rp${price.toLocaleString('id-ID', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })}`;
+  }
   if (price >= 1000) {
     return `$${price.toLocaleString(undefined, {
       minimumFractionDigits: 0,

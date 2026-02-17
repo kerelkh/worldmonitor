@@ -23,7 +23,7 @@ export class MarketPanel extends Panel {
           <span class="market-symbol">${escapeHtml(stock.display)}</span>
         </div>
         <div class="market-data">
-          <span class="market-price">${formatPrice(stock.price!)}</span>
+          <span class="market-price">${formatPrice(stock.price!, stock.currency)}</span>
           <span class="market-change ${getChangeClass(stock.change!)}">${formatChange(stock.change!)}</span>
         </div>
       </div>
@@ -71,7 +71,7 @@ export class CommoditiesPanel extends Panel {
     super({ id: 'commodities', title: 'Commodities / VIX' });
   }
 
-  public renderCommodities(data: Array<{ display: string; price: number | null; change: number | null }>): void {
+  public renderCommodities(data: Array<{ display: string; price: number | null; change: number | null; currency?: string }>): void {
     const validData = data.filter((d) => d.price !== null);
 
     if (validData.length === 0) {
@@ -86,7 +86,7 @@ export class CommoditiesPanel extends Panel {
           (c) => `
         <div class="commodity-item">
           <div class="commodity-name">${escapeHtml(c.display)}</div>
-          <div class="commodity-price">${formatPrice(c.price!)}</div>
+          <div class="commodity-price">${formatPrice(c.price!, c.currency)}</div>
           <div class="commodity-change ${getChangeClass(c.change!)}">${formatChange(c.change!)}</div>
         </div>
       `

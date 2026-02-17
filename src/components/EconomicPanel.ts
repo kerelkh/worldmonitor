@@ -52,11 +52,9 @@ export class EconomicPanel extends Panel {
         <button class="economic-tab ${this.activeTab === 'indicators' ? 'active' : ''}" data-tab="indicators">
           📊 Indicators
         </button>
-        ${hasOil ? `
           <button class="economic-tab ${this.activeTab === 'oil' ? 'active' : ''}" data-tab="oil">
             🛢️ Oil
           </button>
-        ` : ''}
         ${hasSpending ? `
           <button class="economic-tab ${this.activeTab === 'spending' ? 'active' : ''}" data-tab="spending">
             🏛️ Gov

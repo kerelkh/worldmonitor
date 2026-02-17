@@ -39,16 +39,21 @@ interface CoinGeckoResponse {
   };
 }
 
-// Symbols that need Yahoo Finance (indices and futures not supported by Finnhub free tier)
+// Symbols that need Yahoo Finance (indices, futures, and non-US exchanges not supported by Finnhub free tier)
+const YAHOO_ONLY_PREFIXES = ['.JK'];
 const YAHOO_ONLY_SYMBOLS = new Set([
-  '^GSPC', '^DJI', '^IXIC', '^VIX',
-  'GC=F', 'CL=F', 'NG=F', 'SI=F', 'HG=F',
+  '^GSPC', '^DJI', '^IXIC', '^VIX', '^JKSE', '^HSI', '^N225', '^STI',
+  'GC=F', 'CL=F', 'NG=F', 'SI=F', 'HG=F', 'NI=F', 'KE=F', 'SB=F', 'KC=F', 'RR=F', 'CT=F',
 ]);
+
+function isYahooOnly(symbol: string): boolean {
+  return YAHOO_ONLY_SYMBOLS.has(symbol) || YAHOO_ONLY_PREFIXES.some(p => symbol.endsWith(p));
+}
 
 let lastSuccessfulResults: MarketData[] = [];
 
 async function fetchFromFinnhub(
-  symbols: Array<{ symbol: string; name: string; display: string }>
+  symbols: Array<{ symbol: string; name: string; display: string; currency?: string }>
 ): Promise<MarketData[]> {
   const symbolList = symbols.map(s => s.symbol);
   const url = API_URLS.finnhub(symbolList);
@@ -80,6 +85,7 @@ async function fetchFromFinnhub(
           display: info?.display || q.symbol,
           price: q.price,
           change: q.changePercent,
+          currency: info?.currency,
         };
       });
   } catch (error) {
@@ -91,7 +97,8 @@ async function fetchFromFinnhub(
 async function fetchFromYahoo(
   symbol: string,
   name: string,
-  display: string
+  display: string,
+  currency?: string
 ): Promise<MarketData | null> {
   try {
     const url = API_URLS.yahooFinance(symbol);
@@ -107,21 +114,21 @@ async function fetchFromYahoo(
     const prevClose = meta.chartPreviousClose || meta.previousClose || price;
     const change = ((price - prevClose) / prevClose) * 100;
 
-    return { symbol, name, display, price, change };
+    return { symbol, name, display, price, change, currency };
   } catch {
     return null;
   }
 }
 
 export async function fetchMultipleStocks(
-  symbols: Array<{ symbol: string; name: string; display: string }>,
+  symbols: Array<{ symbol: string; name: string; display: string; currency?: string }>,
   options: {
     onBatch?: (results: MarketData[]) => void;
   } = {}
 ): Promise<MarketData[]> {
   // Split symbols into Finnhub-compatible and Yahoo-only
-  const finnhubSymbols = symbols.filter(s => !YAHOO_ONLY_SYMBOLS.has(s.symbol));
-  const yahooSymbols = symbols.filter(s => YAHOO_ONLY_SYMBOLS.has(s.symbol));
+  const finnhubSymbols = symbols.filter(s => !isYahooOnly(s.symbol));
+  const yahooSymbols = symbols.filter(s => isYahooOnly(s.symbol));
 
   const results: MarketData[] = [];
 
@@ -135,7 +142,7 @@ export async function fetchMultipleStocks(
   // Fetch indices/commodities from Yahoo (parallel)
   if (yahooSymbols.length > 0) {
     const yahooResults = await Promise.all(
-      yahooSymbols.map(s => fetchFromYahoo(s.symbol, s.name, s.display))
+      yahooSymbols.map(s => fetchFromYahoo(s.symbol, s.name, s.display, s.currency))
     );
     results.push(...yahooResults.filter((r): r is MarketData => r !== null));
     options.onBatch?.(results);
@@ -154,7 +161,7 @@ export async function fetchStockQuote(
   name: string,
   display: string
 ): Promise<MarketData> {
-  if (YAHOO_ONLY_SYMBOLS.has(symbol)) {
+  if (isYahooOnly(symbol)) {
     const result = await fetchFromYahoo(symbol, name, display);
     return result || { symbol, name, display, price: null, change: null };
   }

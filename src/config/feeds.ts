@@ -641,8 +641,57 @@ const TECH_FEEDS: Record<string, Feed[]> = {
   ],
 };
 
+// Polkam variant feeds (Indonesia-focused + global)
+const POLKAM_FEEDS: Record<string, Feed[]> = {
+  politics: [
+    // Indonesian news (English editions)
+    { name: 'Jakarta Post', url: rss('https://news.google.com/rss/search?q=site:thejakartapost.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Tempo English', url: rss('https://news.google.com/rss/search?q=site:en.tempo.co+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Kompas English', url: rss('https://news.google.com/rss/search?q=site:english.kompas.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Antara News', url: rss('https://news.google.com/rss/search?q=site:en.antaranews.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'CNN Indonesia', url: rss('https://news.google.com/rss/search?q=site:cnnindonesia.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Detik News', url: rss('https://news.google.com/rss/search?q=site:detik.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Indonesia News', url: rss('https://news.google.com/rss/search?q=Indonesia+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    // Global
+    { name: 'BBC World', url: rss('https://feeds.bbci.co.uk/news/world/rss.xml') },
+    { name: 'Reuters World', url: rss('https://news.google.com/rss/search?q=site:reuters.com+world&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'AP News', url: rss('https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en') },
+  ],
+  asia: [
+    { name: 'BBC Asia', url: rss('https://feeds.bbci.co.uk/news/world/asia/rss.xml') },
+    { name: 'South China Morning Post', url: railwayRss('https://www.scmp.com/rss/91/feed/') },
+    { name: 'Reuters Asia', url: rss('https://news.google.com/rss/search?q=site:reuters.com+(China+OR+Japan+OR+Taiwan+OR+Korea)+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'ASEAN News', url: rss('https://news.google.com/rss/search?q=(ASEAN+OR+"Southeast+Asia")+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Indonesia ASEAN', url: rss('https://news.google.com/rss/search?q=Indonesia+(ASEAN+OR+diplomacy+OR+"foreign+policy")+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Asia Pacific', url: rss('https://news.google.com/rss/search?q=(China+OR+Japan+OR+Korea+OR+India+OR+ASEAN)+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'The Diplomat', url: rss('https://thediplomat.com/feed/') },
+  ],
+  finance: [
+    // Indonesian markets
+    { name: 'Indonesia Finance', url: rss('https://news.google.com/rss/search?q=(IDX+OR+IHSG+OR+"Indonesia+stock"+OR+Rupiah+OR+"Bank+Indonesia")+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Bisnis Indonesia', url: rss('https://news.google.com/rss/search?q=site:bisnis.com+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Kontan', url: rss('https://news.google.com/rss/search?q=site:kontan.co.id+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    // Global
+    { name: 'CNBC', url: rss('https://www.cnbc.com/id/100003114/device/rss/rss.html') },
+    { name: 'Reuters Business', url: rss('https://news.google.com/rss/search?q=site:reuters.com+business+markets&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'MarketWatch', url: rss('https://feeds.marketwatch.com/marketwatch/topstories') },
+    { name: 'Yahoo Finance', url: rss('https://finance.yahoo.com/news/rssindex') },
+  ],
+  energy: [
+    // Indonesian energy
+    { name: 'Indonesia Energy', url: rss('https://news.google.com/rss/search?q=(Pertamina+OR+"Indonesia+oil"+OR+"Indonesia+gas"+OR+"Indonesia+coal"+OR+"Indonesia+mining")+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Palm Oil', url: rss('https://news.google.com/rss/search?q=("palm+oil"+OR+CPO+OR+"crude+palm+oil"+Indonesia)+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Indonesia LNG', url: rss('https://news.google.com/rss/search?q=(LNG+OR+"liquefied+natural+gas"+Indonesia)+when:7d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Indonesia Mining', url: rss('https://news.google.com/rss/search?q=(nickel+OR+tin+OR+bauxite+OR+copper+Indonesia+mining)+when:7d&hl=en-US&gl=US&ceid=US:en') },
+    // Global energy
+    { name: 'Oil & Gas', url: rss('https://news.google.com/rss/search?q=(oil+price+OR+OPEC+OR+"natural+gas"+OR+pipeline+OR+LNG)+when:2d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Reuters Energy', url: rss('https://news.google.com/rss/search?q=site:reuters.com+(oil+OR+gas+OR+energy+OR+OPEC)+when:3d&hl=en-US&gl=US&ceid=US:en') },
+    { name: 'Mining & Resources', url: rss('https://news.google.com/rss/search?q=(lithium+OR+"rare+earth"+OR+cobalt+OR+mining)+when:3d&hl=en-US&gl=US&ceid=US:en') },
+  ],
+};
+
 // Variant-aware exports
-export const FEEDS = SITE_VARIANT === 'tech' ? TECH_FEEDS : FULL_FEEDS;
+export const FEEDS = SITE_VARIANT === 'tech' ? TECH_FEEDS : SITE_VARIANT === 'polkam' ? POLKAM_FEEDS : FULL_FEEDS;
 
 export const INTEL_SOURCES: Feed[] = [
   // Defense & Security (Tier 1)
