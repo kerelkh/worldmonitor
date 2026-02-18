@@ -31,7 +31,9 @@ const TECH_APIS = new Set([
 const WORLD_FEEDS = new Set([
   'Politics', 'Middleeast', 'Tech', 'Ai', 'Finance',
   'Gov', 'Intel', 'Layoffs', 'Thinktanks', 'Energy',
-  'Polymarket', 'Weather', 'NetBlocks', 'Shipping', 'Military'
+  'Polymarket', 'Weather', 'NetBlocks', 'Shipping', 'Military',
+  // Polkam variant feeds
+  'Indonesia', 'Criminals', 'Asia',
 ]);
 const WORLD_APIS = new Set([
   'RSS2JSON', 'Finnhub', 'CoinGecko', 'Polymarket', 'USGS', 'FRED',

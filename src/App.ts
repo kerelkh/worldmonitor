@@ -1339,6 +1339,11 @@ export class App {
       this.attachRelatedAssetHandlers(indonesiaPanel);
       this.newsPanels['indonesia'] = indonesiaPanel;
       this.panels['indonesia'] = indonesiaPanel;
+
+      const criminalsPanel = new NewsPanel('criminals', 'Kriminal & Bencana');
+      this.attachRelatedAssetHandlers(criminalsPanel);
+      this.newsPanels['criminals'] = criminalsPanel;
+      this.panels['criminals'] = criminalsPanel;
     }
 
     const techPanel = new NewsPanel('tech', 'Technology / AI');
@@ -2301,7 +2306,7 @@ export class App {
     }
   }
 
-  private async loadNewsCategory(category: string, feeds: typeof FEEDS.politics): Promise<NewsItem[]> {
+  private async loadNewsCategory(category: string, feeds: typeof FEEDS.politics, topLimit?: number): Promise<NewsItem[]> {
     try {
       const panel = this.newsPanels[category];
       const renderIntervalMs = 250;
@@ -2349,6 +2354,7 @@ export class App {
       };
 
       const items = await fetchCategoryFeeds(enabledFeeds, {
+        topLimit,
         onBatch: (partialItems) => {
           scheduleRender(partialItems);
           this.flashMapForNews(partialItems);
@@ -2389,6 +2395,7 @@ export class App {
     // Build categories dynamically based on what feeds exist
     const allCategories = [
       { key: 'indonesia', feeds: (FEEDS as Record<string, Feed[]>).indonesia },
+      { key: 'criminals', feeds: (FEEDS as Record<string, Feed[]>).criminals, topLimit: 40 },
       { key: 'politics', feeds: FEEDS.politics },
       { key: 'tech', feeds: FEEDS.tech },
       { key: 'finance', feeds: FEEDS.finance },
@@ -2422,7 +2429,7 @@ export class App {
 
     // Fetch all categories in parallel
     const categoryResults = await Promise.allSettled(
-      categories.map(({ key, feeds }) => this.loadNewsCategory(key, feeds))
+      categories.map(({ key, feeds, topLimit }) => this.loadNewsCategory(key, feeds, topLimit))
     );
 
     // Collect successful results

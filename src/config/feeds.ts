@@ -648,7 +648,7 @@ const enNews = (query: string) => rss(`https://news.google.com/rss/search?q=${en
 
 const POLKAM_FEEDS: Record<string, Feed[]> = {
   indonesia: [
-    // Indonesian news (Bahasa Indonesia)
+    // === Major Indonesian outlets (Bahasa Indonesia) ===
     { name: 'Berita Terkini', url: idNews('Indonesia when:1d') },
     { name: 'Kompas', url: idNews('site:kompas.com when:2d') },
     { name: 'Detik News', url: idNews('site:detik.com when:2d') },
@@ -657,49 +657,168 @@ const POLKAM_FEEDS: Record<string, Feed[]> = {
     { name: 'Antara', url: idNews('site:antaranews.com when:2d') },
     { name: 'Republika', url: idNews('site:republika.co.id when:2d') },
     { name: 'Tribunnews', url: idNews('site:tribunnews.com when:2d') },
+    { name: 'Liputan6', url: idNews('site:liputan6.com when:2d') },
+    { name: 'Okezone', url: idNews('site:okezone.com when:2d') },
+    { name: 'Sindonews', url: idNews('site:sindonews.com when:2d') },
+    { name: 'Merdeka', url: idNews('site:merdeka.com when:2d') },
+    { name: 'Suara.com', url: idNews('site:suara.com when:2d') },
+    { name: 'VIVA', url: idNews('site:viva.co.id when:2d') },
+    { name: 'Bisnis Indonesia', url: idNews('site:bisnis.com when:2d') },
+    { name: 'Kontan', url: idNews('site:kontan.co.id when:2d') },
+    { name: 'iNews', url: idNews('site:inews.id when:2d') },
+    { name: 'JPNN', url: idNews('site:jpnn.com when:2d') },
+    { name: 'Kumparan', url: idNews('site:kumparan.com when:2d') },
+    // === Politik & Pemerintahan ===
+    { name: 'Politik RI', url: idNews('(politik OR DPR OR presiden OR menteri OR kabinet) Indonesia when:2d') },
+    { name: 'Pemerintahan', url: idNews('(pemerintah OR kebijakan OR regulasi OR "peraturan pemerintah") Indonesia when:3d') },
+    // === English Indonesia coverage ===
     { name: 'Jakarta Post', url: enNews('site:thejakartapost.com when:2d') },
+    { name: 'Jakarta Globe', url: enNews('site:jakartaglobe.id when:2d') },
+    { name: 'Reuters Indonesia', url: enNews('site:reuters.com Indonesia when:3d') },
+    { name: 'Bloomberg Indonesia', url: enNews('Bloomberg Indonesia when:3d') },
   ],
   politics: [
-    // World / Geopolitical news
+    // === Direct RSS feeds — international wire & major outlets ===
     { name: 'BBC World', url: rss('https://feeds.bbci.co.uk/news/world/rss.xml') },
-    { name: 'Reuters', url: enNews('site:reuters.com world when:2d') },
     { name: 'Al Jazeera', url: rss('https://www.aljazeera.com/xml/rss/all.xml') },
-    { name: 'AP News', url: enNews('site:apnews.com world when:2d') },
     { name: 'France 24', url: rss('https://www.france24.com/en/rss') },
+    { name: 'Guardian World', url: rss('https://www.theguardian.com/world/rss') },
+    { name: 'NPR News', url: rss('https://feeds.npr.org/1001/rss.xml') },
+    { name: 'CNN World', url: rss('http://rss.cnn.com/rss/cnn_world.rss') },
+    { name: 'DW News', url: rss('https://rss.dw.com/rdf/rss-en-all') },
+    // === Google News — wire services & major outlets ===
+    { name: 'Reuters World', url: enNews('site:reuters.com world when:2d') },
+    { name: 'AP News', url: enNews('site:apnews.com world when:2d') },
+    { name: 'Bloomberg World', url: enNews('site:bloomberg.com world politics when:2d') },
+    { name: 'Politico', url: enNews('site:politico.com when:2d') },
+    { name: 'Foreign Policy', url: enNews('site:foreignpolicy.com when:3d') },
+    // === Geopolitical topics ===
+    { name: 'Geopolitik', url: enNews('(geopolitics OR "international relations" OR diplomacy OR sanctions) when:2d') },
+    { name: 'Konflik Global', url: enNews('(war OR conflict OR military OR ceasefire OR "peace talks") when:2d') },
+    { name: 'NATO & Pertahanan', url: enNews('(NATO OR "European defense" OR "US military" OR Pentagon) when:3d') },
+    // === Indonesian world news perspective (Bahasa) ===
+    { name: 'Dunia - Kompas', url: idNews('site:kompas.com (dunia OR internasional) when:2d') },
+    { name: 'Dunia - Detik', url: idNews('site:detik.com (internasional OR dunia) when:2d') },
+    { name: 'Dunia - CNN ID', url: idNews('site:cnnindonesia.com internasional when:2d') },
+    { name: 'Dunia - Tempo', url: idNews('site:tempo.co (dunia OR internasional) when:2d') },
   ],
   asia: [
-    // ASEAN & Asia in Bahasa
-    { name: 'ASEAN Indonesia', url: idNews('(ASEAN OR "Asia Tenggara") when:3d') },
-    { name: 'Berita Asia', url: idNews('(China OR Jepang OR Korea OR India OR ASEAN) when:2d') },
-    { name: 'Diplomasi RI', url: idNews('(diplomasi OR "luar negeri" OR "kementerian luar negeri" OR Retno) when:3d') },
-    // English
+    // === Direct RSS feeds ===
     { name: 'BBC Asia', url: rss('https://feeds.bbci.co.uk/news/world/asia/rss.xml') },
     { name: 'South China Morning Post', url: railwayRss('https://www.scmp.com/rss/91/feed/') },
     { name: 'The Diplomat', url: rss('https://thediplomat.com/feed/') },
+    { name: 'Channel News Asia', url: rss('https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml') },
+    // === ASEAN & Indonesia perspective (Bahasa) ===
+    { name: 'ASEAN Indonesia', url: idNews('(ASEAN OR "Asia Tenggara") when:3d') },
+    { name: 'Berita Asia', url: idNews('(China OR Jepang OR Korea OR India OR ASEAN) when:2d') },
+    { name: 'Diplomasi RI', url: idNews('(diplomasi OR "luar negeri" OR "kementerian luar negeri") when:3d') },
+    { name: 'Laut China Selatan', url: idNews('("Laut China Selatan" OR Natuna OR "ZEE" OR "kapal asing") when:7d') },
+    { name: 'ASEAN - Kompas', url: idNews('site:kompas.com (ASEAN OR "Asia Tenggara" OR regional) when:3d') },
+    { name: 'ASEAN - Detik', url: idNews('site:detik.com (ASEAN OR "Asia Tenggara") when:3d') },
+    { name: 'ASEAN - Tempo', url: idNews('site:tempo.co (ASEAN OR "Asia Tenggara" OR regional) when:3d') },
+    { name: 'ASEAN - Antara', url: idNews('site:antaranews.com (ASEAN OR "Asia Tenggara") when:3d') },
+    // === Regional topics (English) ===
     { name: 'Asia Pacific', url: enNews('(China OR Japan OR Korea OR Taiwan OR ASEAN) when:2d') },
+    { name: 'South China Sea', url: enNews('("South China Sea" OR Natuna OR "Taiwan Strait" OR "East China Sea") when:3d') },
+    { name: 'Southeast Asia', url: enNews('("Southeast Asia" OR ASEAN OR Philippines OR Vietnam OR Myanmar OR Thailand) when:2d') },
+    { name: 'China News', url: enNews('(China economy OR China military OR China politics OR Xi Jinping) when:2d') },
+    { name: 'Japan & Korea', url: enNews('(Japan OR "South Korea" OR "North Korea" OR Kishida OR Yoon) when:3d') },
+    { name: 'India News', url: enNews('(India OR Modi OR "Indian Ocean" OR "Indo-Pacific") when:3d') },
+    { name: 'Nikkei Asia', url: enNews('site:asia.nikkei.com when:3d') },
+    { name: 'Reuters Asia', url: enNews('site:reuters.com (Asia OR China OR Japan OR ASEAN) when:3d') },
   ],
   finance: [
-    // Indonesian finance (Bahasa)
-    { name: 'IHSG & Saham', url: idNews('(IHSG OR saham OR "Bursa Efek" OR IDX) when:2d') },
-    { name: 'Rupiah & BI', url: idNews('(Rupiah OR "Bank Indonesia" OR "suku bunga" OR inflasi) when:3d') },
+    // === Indonesian finance — site-specific (Bahasa) ===
     { name: 'Bisnis Indonesia', url: idNews('site:bisnis.com when:2d') },
     { name: 'Kontan', url: idNews('site:kontan.co.id when:2d') },
-    { name: 'Ekonomi RI', url: idNews('(ekonomi OR APBN OR "pertumbuhan ekonomi" OR ekspor OR impor) Indonesia when:3d') },
-    // Global
+    { name: 'CNBC Indonesia', url: idNews('site:cnbcindonesia.com when:2d') },
+    { name: 'Investor Daily', url: idNews('site:investor.id when:2d') },
+    { name: 'Detik Finance', url: idNews('site:detik.com (finance OR ekonomi OR bisnis) when:2d') },
+    { name: 'Kompas Bisnis', url: idNews('site:kompas.com (bisnis OR ekonomi OR keuangan) when:2d') },
+    { name: 'Tempo Bisnis', url: idNews('site:tempo.co (bisnis OR ekonomi OR keuangan) when:2d') },
+    { name: 'Liputan6 Bisnis', url: idNews('site:liputan6.com (bisnis OR ekonomi) when:2d') },
+    // === Indonesian finance — topic queries (Bahasa) ===
+    { name: 'IHSG & Saham', url: idNews('(IHSG OR saham OR "Bursa Efek" OR IDX OR emiten) when:2d') },
+    { name: 'Rupiah & BI', url: idNews('(Rupiah OR "Bank Indonesia" OR "suku bunga" OR inflasi OR "cadangan devisa") when:3d') },
+    { name: 'APBN & Fiskal', url: idNews('(APBN OR "anggaran negara" OR "penerimaan pajak" OR "defisit anggaran" OR fiskal) when:3d') },
+    { name: 'Perbankan RI', url: idNews('(perbankan OR "bank sentral" OR OJK OR "kredit macet" OR NPL) Indonesia when:3d') },
+    { name: 'Ekonomi RI', url: idNews('(ekonomi OR "pertumbuhan ekonomi" OR ekspor OR impor OR "neraca perdagangan") Indonesia when:3d') },
+    { name: 'Investasi RI', url: idNews('(investasi OR "penanaman modal" OR BKPM OR "investor asing" OR FDI) Indonesia when:3d') },
+    // === Global finance — direct RSS ===
     { name: 'CNBC', url: rss('https://www.cnbc.com/id/100003114/device/rss/rss.html') },
     { name: 'MarketWatch', url: rss('https://feeds.marketwatch.com/marketwatch/topstories') },
+    { name: 'Yahoo Finance', url: rss('https://finance.yahoo.com/rss/topstories') },
+    { name: 'Financial Times', url: rss('https://www.ft.com/rss/home') },
+    // === Global finance — Google News ===
     { name: 'Reuters Business', url: enNews('site:reuters.com business markets when:2d') },
+    { name: 'Bloomberg Markets', url: enNews('site:bloomberg.com markets economy when:2d') },
+    { name: 'Global Economy', url: enNews('("global economy" OR "world economy" OR "Federal Reserve" OR "interest rate" OR recession) when:2d') },
   ],
   energy: [
-    // Indonesian energy (Bahasa)
-    { name: 'Energi Indonesia', url: idNews('(Pertamina OR PLN OR "energi" OR "minyak bumi" OR "gas alam" OR batubara) when:3d') },
-    { name: 'Sawit & CPO', url: idNews('(sawit OR CPO OR "kelapa sawit" OR "minyak sawit") when:3d') },
-    { name: 'Tambang & Nikel', url: idNews('(nikel OR timah OR bauksit OR tembaga OR "tambang" OR Freeport) Indonesia when:3d') },
-    { name: 'Minerba', url: idNews('(ESDM OR minerba OR "energi terbarukan" OR "listrik") Indonesia when:7d') },
-    // Global energy
-    { name: 'Oil & Gas', url: enNews('(oil price OR OPEC OR "natural gas" OR LNG) when:2d') },
+    // === Indonesian energy — site-specific (Bahasa) ===
+    { name: 'Detik Energi', url: idNews('site:detik.com (energi OR migas OR pertambangan OR batubara) when:2d') },
+    { name: 'Kompas Energi', url: idNews('site:kompas.com (energi OR migas OR pertambangan) when:2d') },
+    { name: 'Bisnis Energi', url: idNews('site:bisnis.com (energi OR migas OR tambang OR batubara) when:2d') },
+    { name: 'Kontan Energi', url: idNews('site:kontan.co.id (energi OR migas OR tambang) when:2d') },
+    { name: 'CNBC ID Energi', url: idNews('site:cnbcindonesia.com (energi OR migas OR pertambangan) when:2d') },
+    { name: 'Tempo Energi', url: idNews('site:tempo.co (energi OR migas OR tambang) when:3d') },
+    // === Indonesian energy — topic queries (Bahasa) ===
+    { name: 'Pertamina & PLN', url: idNews('(Pertamina OR PLN OR "BBM" OR "subsidi energi" OR "tarif listrik") when:3d') },
+    { name: 'Migas Indonesia', url: idNews('("minyak bumi" OR "gas alam" OR LNG OR kilang OR "hulu migas" OR SKK) when:3d') },
+    { name: 'Sawit & CPO', url: idNews('(sawit OR CPO OR "kelapa sawit" OR "minyak sawit" OR "biodiesel") when:3d') },
+    { name: 'Tambang & Nikel', url: idNews('(nikel OR timah OR bauksit OR tembaga OR "tambang" OR Freeport OR INALUM) Indonesia when:3d') },
+    { name: 'Batubara', url: idNews('(batubara OR "batu bara" OR "harga batubara" OR "ekspor batubara" OR DMO) Indonesia when:3d') },
+    { name: 'Minerba & ESDM', url: idNews('(ESDM OR minerba OR "energi terbarukan" OR "listrik" OR "energi baru") Indonesia when:7d') },
+    { name: 'EBT & Transisi', url: idNews('("energi terbarukan" OR "panel surya" OR "tenaga angin" OR "panas bumi" OR geothermal) Indonesia when:7d') },
+    // === Global energy — direct RSS ===
     { name: 'Reuters Energy', url: enNews('site:reuters.com (oil OR gas OR energy OR OPEC) when:3d') },
-    { name: 'Mining Global', url: enNews('(nickel OR coal OR copper OR "rare earth" mining) when:3d') },
+    // === Global energy — Google News ===
+    { name: 'Oil & Gas', url: enNews('(oil price OR OPEC OR "natural gas" OR LNG OR "crude oil") when:2d') },
+    { name: 'Coal Global', url: enNews('(coal price OR "thermal coal" OR "coal market" OR "coal export") when:3d') },
+    { name: 'Mining Global', url: enNews('(nickel OR coal OR copper OR "rare earth" OR lithium mining) when:3d') },
+    { name: 'Palm Oil Global', url: enNews('("palm oil" OR "crude palm oil" OR CPO price) when:3d') },
+    { name: 'Nuclear Energy', url: enNews('("nuclear energy" OR "nuclear power" OR uranium OR IAEA) when:3d') },
+    { name: 'Energy Transition', url: enNews('("energy transition" OR "renewable energy" OR "clean energy" OR "green hydrogen") when:3d') },
+  ],
+  criminals: [
+    // === KRIMINAL — site-specific from major Indonesian outlets ===
+    { name: 'Detik Hukum', url: idNews('site:detik.com (hukum OR kriminal OR pidana) when:2d') },
+    { name: 'Kompas Hukum', url: idNews('site:kompas.com (hukum OR kriminal OR kejahatan) when:2d') },
+    { name: 'CNN Indonesia Kriminal', url: idNews('site:cnnindonesia.com (kriminal OR hukum OR kejahatan) when:2d') },
+    { name: 'Tempo Hukum', url: idNews('site:tempo.co (hukum OR kriminal OR korupsi) when:2d') },
+    { name: 'Tribunnews Kriminal', url: idNews('site:tribunnews.com (kriminal OR kejahatan OR pembunuhan) when:2d') },
+    { name: 'Liputan6 Kriminal', url: idNews('site:liputan6.com (kriminal OR hukum OR kejahatan) when:2d') },
+    { name: 'Antara Hukum', url: idNews('site:antaranews.com (hukum OR kriminal OR polisi) when:2d') },
+    { name: 'Republika Hukum', url: idNews('site:republika.co.id (hukum OR kriminal) when:3d') },
+    { name: 'Okezone Kriminal', url: idNews('site:okezone.com (kriminal OR kejahatan OR pembunuhan) when:2d') },
+    { name: 'Suara Kriminal', url: idNews('site:suara.com (kriminal OR kejahatan OR hukum) when:2d') },
+    { name: 'Sindonews Hukum', url: idNews('site:sindonews.com (hukum OR kriminal OR pidana) when:2d') },
+    { name: 'Merdeka Kriminal', url: idNews('site:merdeka.com (kriminal OR kejahatan OR hukum) when:2d') },
+    // === KRIMINAL — topic-specific queries ===
+    { name: 'Korupsi & KPK', url: idNews('(KPK OR korupsi OR "tindak pidana korupsi" OR koruptor OR suap OR gratifikasi) when:3d') },
+    { name: 'Narkoba & BNN', url: idNews('(narkoba OR narkotika OR BNN OR "barang bukti" OR pengedar OR ganja OR sabu) when:3d') },
+    { name: 'Polri & Kepolisian', url: idNews('(Polri OR kepolisian OR penangkapan OR tersangka OR "barang bukti" OR Bareskrim) when:2d') },
+    { name: 'Kejaksaan & Pengadilan', url: idNews('(kejaksaan OR pengadilan OR jaksa OR hakim OR vonis OR terdakwa) when:3d') },
+    { name: 'Terorisme', url: idNews('(terorisme OR teroris OR Densus OR BNPT OR radikalisme) Indonesia when:3d') },
+    { name: 'Penipuan & Siber', url: idNews('(penipuan OR "penipuan online" OR "kejahatan siber" OR skimming OR phishing OR judi) Indonesia when:3d') },
+    // === BENCANA — site-specific from major outlets ===
+    { name: 'Detik Bencana', url: idNews('site:detik.com (bencana OR gempa OR banjir OR longsor) when:2d') },
+    { name: 'Kompas Bencana', url: idNews('site:kompas.com (bencana OR gempa OR banjir OR tsunami) when:2d') },
+    { name: 'CNN Indonesia Bencana', url: idNews('site:cnnindonesia.com (bencana OR gempa OR banjir OR gunung) when:2d') },
+    { name: 'Tempo Bencana', url: idNews('site:tempo.co (bencana OR gempa OR banjir) when:3d') },
+    { name: 'Tribunnews Bencana', url: idNews('site:tribunnews.com (bencana OR gempa OR banjir OR longsor) when:2d') },
+    { name: 'Liputan6 Bencana', url: idNews('site:liputan6.com (bencana OR gempa OR banjir) when:2d') },
+    // === BENCANA — topic-specific queries ===
+    { name: 'BNPB & Evakuasi', url: idNews('(BNPB OR "badan penanggulangan bencana" OR evakuasi OR pengungsi OR "tanggap darurat") when:3d') },
+    { name: 'BMKG & Gempa', url: idNews('(BMKG OR gempa OR tsunami OR "peringatan dini" OR "gempa bumi") Indonesia when:2d') },
+    { name: 'Banjir & Longsor', url: idNews('(banjir OR longsor OR "tanah longsor" OR "banjir bandang" OR rob) Indonesia when:3d') },
+    { name: 'Gunung Berapi', url: idNews('(gunung OR erupsi OR vulkanik OR "gunung berapi" OR lahar OR Merapi OR Semeru) Indonesia when:3d') },
+    { name: 'Kebakaran Hutan', url: idNews('(kebakaran OR karhutla OR "kebakaran hutan" OR "titik panas" OR "kabut asap") Indonesia when:3d') },
+    { name: 'Kecelakaan', url: idNews('(kecelakaan OR "kecelakaan lalu lintas" OR tabrakan OR tenggelam OR "kapal tenggelam") Indonesia when:2d') },
+    // === English sources ===
+    { name: 'Indonesia Disasters (EN)', url: enNews('(Indonesia earthquake OR Indonesia flood OR Indonesia tsunami OR Indonesia volcano OR Indonesia landslide) when:3d') },
+    { name: 'Indonesia Crime (EN)', url: enNews('(Indonesia crime OR Indonesia corruption OR Indonesia drug OR Indonesia police OR Indonesia arrest) when:3d') },
+    { name: 'Jakarta Post Hukum', url: enNews('site:thejakartapost.com (crime OR disaster OR earthquake OR flood OR corruption) when:3d') },
   ],
 };
 

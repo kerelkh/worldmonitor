@@ -204,6 +204,7 @@ const POLKAM_PANELS: Record<string, PanelConfig> = {
   insights: { name: 'AI Insights', enabled: true, priority: 1 },
   intel: { name: 'Intel Feed', enabled: true, priority: 1 },
   indonesia: { name: 'Berita Indonesia', enabled: true, priority: 1 },
+  criminals: { name: 'Kriminal & Bencana', enabled: true, priority: 1 },
   politics: { name: 'World News', enabled: true, priority: 1 },
   asia: { name: 'Asia-Pacific', enabled: true, priority: 1 },
   economic: { name: 'Economic Indicators', enabled: true, priority: 1 },
