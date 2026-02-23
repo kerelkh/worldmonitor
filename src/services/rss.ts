@@ -122,12 +122,15 @@ export async function fetchFeed(feed: Feed): Promise<NewsItem[]> {
           link = item.querySelector('link')?.textContent || '';
         }
 
-        // Atom uses <published> or <updated>, RSS uses <pubDate>
+        // Atom uses <published> or <updated>, RSS uses <pubDate> or <dc:date>
         const pubDateStr = isAtom
           ? (item.querySelector('published')?.textContent ||
              item.querySelector('updated')?.textContent || '')
-          : (item.querySelector('pubDate')?.textContent || '');
-        const pubDate = pubDateStr ? new Date(pubDateStr) : new Date();
+          : (item.querySelector('pubDate')?.textContent ||
+             item.querySelector('date')?.textContent || '');
+        const parsedDate = pubDateStr ? new Date(pubDateStr) : null;
+        // Only use parsed date if valid; null signals missing date (resolved below)
+        const pubDate = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null;
 
         // Classify threat level
         const threat = classifyByKeyword(title, SITE_VARIANT);
@@ -143,12 +146,24 @@ export async function fetchFeed(feed: Feed): Promise<NewsItem[]> {
           source: feed.name,
           title,
           link,
-          pubDate,
+          pubDate: pubDate as Date, // temporarily null, resolved below
           isAlert,
           threat,
           ...(topGeo && { lat: topGeo.hub.lat, lon: topGeo.hub.lon, locationName: topGeo.hub.name }),
         };
       });
+
+    // Resolve items with missing dates: use the oldest valid date from this feed
+    // so they don't float to the top as "newest"
+    const validDates = parsed.filter(i => i.pubDate != null).map(i => i.pubDate.getTime());
+    const fallbackDate = validDates.length > 0
+      ? new Date(Math.min(...validDates))
+      : new Date(); // truly no dates at all, use now as last resort
+    for (const item of parsed) {
+      if (item.pubDate == null) {
+        item.pubDate = fallbackDate;
+      }
+    }
 
     // Cache successful result
     feedCache.set(feed.name, { items: parsed, timestamp: Date.now() });

@@ -262,15 +262,18 @@ export class NewsPanel extends Panel {
   private renderFlat(items: NewsItem[]): void {
     this.setCount(items.length);
 
+    // Sort by time (newest first) to ensure chronological order
+    const sorted = [...items].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+
     // Store headlines sorted by threat priority (high priority first) for summarization
-    const prioritized = [...items].sort((a, b) => {
+    const prioritized = [...sorted].sort((a, b) => {
       const pa = THREAT_PRIORITY[a.threat?.level ?? 'info'];
       const pb = THREAT_PRIORITY[b.threat?.level ?? 'info'];
       return pb - pa;
     });
     this.currentHeadlines = prioritized.map(i => i.title);
 
-    const html = items
+    const html = sorted
       .map(
         (item) => `
       <div class="item ${item.isAlert ? 'alert' : ''}" ${item.monitorColor ? `style="border-left-color: ${escapeHtml(item.monitorColor)}"` : ''}>
