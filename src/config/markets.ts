@@ -1,6 +1,5 @@
 import type { Sector, Commodity, MarketSymbol } from '@/types';
-
-const SITE_VARIANT = import.meta.env.VITE_VARIANT || 'full';
+import { SITE_VARIANT } from './variant';
 
 export const SECTORS: Sector[] = [
   { symbol: 'XLK', name: 'Tech' },

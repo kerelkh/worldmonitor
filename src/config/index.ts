@@ -2,8 +2,9 @@
 // For variant-specific builds, set VITE_VARIANT environment variable
 // VITE_VARIANT=tech → startups.worldmonitor.app (tech-focused)
 // VITE_VARIANT=full → worldmonitor.app (geopolitical)
+// Runtime override: ?variant=polkam|tech|full
 
-export const SITE_VARIANT = import.meta.env.VITE_VARIANT || 'full';
+export { SITE_VARIANT } from './variant';
 
 // Shared base configuration (always included)
 export {

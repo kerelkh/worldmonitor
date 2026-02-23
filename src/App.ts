@@ -1070,28 +1070,25 @@ export class App {
       <div class="header">
         <div class="header-left">
           <div class="variant-switcher">
-            <a href="${SITE_VARIANT === 'full' ? '#' : 'https://worldmonitor.app'}"
-               class="variant-option ${SITE_VARIANT == 'full' ? 'active' : ''}"
-               data-variant="world"
+            <button class="variant-option ${SITE_VARIANT === 'full' ? 'active' : ''}"
+               data-variant="full"
                title="Geopolitical Intelligence">
               <span class="variant-icon">🌍</span>
               <span class="variant-label">WORLD</span>
-            </a>
+            </button>
             <span class="variant-divider"></span>
-            <a href="${SITE_VARIANT === 'tech' ? '#' : 'https://tech.worldmonitor.app'}"
-               class="variant-option ${SITE_VARIANT === 'tech' ? 'active' : ''}"
+            <button class="variant-option ${SITE_VARIANT === 'tech' ? 'active' : ''}"
                data-variant="tech"
                title="Tech & AI Intelligence">
               <span class="variant-icon">💻</span>
               <span class="variant-label">TECH</span>
-            </a>
-            <a href="${SITE_VARIANT === 'polkam' ? '#' : 'localhost:3000'}"
-               class="variant-option ${SITE_VARIANT === 'polkam' ? 'active' : ''}"
+            </button>
+            <button class="variant-option ${SITE_VARIANT === 'polkam' ? 'active' : ''}"
                data-variant="polkam"
-               title="Polkam Intelligence (Coming Soon)">
+               title="Indonesia Intelligence">
               <span class="variant-icon">🏛️</span>
               <span class="variant-label">POLKAM</span>
-            </a>
+            </button>
           </div>
           <span class="logo">MONITOR</span><span class="version">v${__APP_VERSION__}</span>
           <a href="https://x.com/eliehabib" target="_blank" rel="noopener" class="credit-link">
@@ -1748,6 +1745,18 @@ export class App {
   }
 
   private setupEventListeners(): void {
+    // Variant switcher
+    this.container.querySelectorAll('.variant-option').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const variant = (btn as HTMLElement).dataset.variant;
+        if (!variant || variant === SITE_VARIANT) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', variant);
+        window.location.href = url.toString();
+      });
+    });
+
     // Search button
     document.getElementById('searchBtn')?.addEventListener('click', () => {
       this.updateSearchIndex();
