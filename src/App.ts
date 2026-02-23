@@ -2398,19 +2398,20 @@ export class App {
 
   private async loadNews(): Promise<void> {
     // Build categories dynamically based on what feeds exist
+    const isPolkam = SITE_VARIANT === 'polkam';
     const allCategories = [
-      { key: 'indonesia', feeds: (FEEDS as Record<string, Feed[]>).indonesia },
-      { key: 'criminals', feeds: (FEEDS as Record<string, Feed[]>).criminals, topLimit: 40 },
-      { key: 'weather', feeds: (FEEDS as Record<string, Feed[]>).weather },
-      { key: 'politics', feeds: FEEDS.politics },
+      { key: 'indonesia', feeds: (FEEDS as Record<string, Feed[]>).indonesia, ...(isPolkam && { topLimit: 40 }) },
+      { key: 'criminals', feeds: (FEEDS as Record<string, Feed[]>).criminals, ...(isPolkam && { topLimit: 40 }) },
+      { key: 'weather', feeds: (FEEDS as Record<string, Feed[]>).weather, ...(isPolkam && { topLimit: 40 }) },
+      { key: 'politics', feeds: FEEDS.politics, ...(isPolkam && { topLimit: 40 }) },
       { key: 'tech', feeds: FEEDS.tech },
-      { key: 'finance', feeds: FEEDS.finance },
+      { key: 'finance', feeds: FEEDS.finance, ...(isPolkam && { topLimit: 40 }) },
       { key: 'gov', feeds: FEEDS.gov },
       { key: 'middleeast', feeds: FEEDS.middleeast },
       { key: 'africa', feeds: FEEDS.africa },
       { key: 'latam', feeds: FEEDS.latam },
-      { key: 'asia', feeds: FEEDS.asia },
-      { key: 'energy', feeds: FEEDS.energy },
+      { key: 'asia', feeds: FEEDS.asia, ...(isPolkam && { topLimit: 40 }) },
+      { key: 'energy', feeds: FEEDS.energy, ...(isPolkam && { topLimit: 40 }) },
       { key: 'layoffs', feeds: FEEDS.layoffs },
       { key: 'ai', feeds: FEEDS.ai },
       { key: 'thinktanks', feeds: FEEDS.thinktanks },
