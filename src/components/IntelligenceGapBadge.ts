@@ -2,12 +2,28 @@ import { getRecentSignals, type CorrelationSignal } from '@/services/correlation
 import { getRecentAlerts, type UnifiedAlert } from '@/services/cross-module-integration';
 import { getSignalContext } from '@/utils/analysis-constants';
 import { escapeHtml } from '@/utils/sanitize';
+import { SITE_VARIANT } from '@/config';
 
 const LOW_COUNT_THRESHOLD = 3;
 const MAX_VISIBLE_FINDINGS = 10;
 const SORT_TIME_TOLERANCE_MS = 60000;
 const REFRESH_INTERVAL_MS = 10000;
 const ALERT_HOURS = 6;
+
+const isPolkam = SITE_VARIANT === 'polkam';
+
+// Indonesia-relevant country codes and keywords for polkam filtering
+const INDONESIA_COUNTRIES = new Set([
+  'ID', 'Indonesia',
+  'MY', 'Malaysia',
+  'SG', 'Singapore',
+  'TL', 'Timor-Leste', 'East Timor',
+  'PG', 'Papua New Guinea',
+  'AU', 'Australia',
+  'PH', 'Philippines',
+]);
+
+const INDONESIA_KEYWORDS = /\b(indonesia|jakarta|java|sumatra|sulawesi|kalimantan|borneo|papua|bali|bmkg|bnpb|tni|polri|malacca|natuna|south china sea|asean|palm oil|nickel|rupiah|bank indonesia|jokowi|prabowo|idn|strait of malacca|makassar|sunda strait|lombok|banda sea|arafura|timor sea|coral triangle)\b/i;
 
 type FindingSource = 'signal' | 'alert';
 
@@ -39,7 +55,7 @@ export class IntelligenceFindingsBadge {
   constructor() {
     this.badge = document.createElement('button');
     this.badge.className = 'intel-findings-badge';
-    this.badge.title = 'Intelligence findings';
+    this.badge.title = isPolkam ? 'Temuan intelijen' : 'Intelligence findings';
     this.badge.innerHTML = '<span class="findings-icon">🎯</span><span class="findings-count">0</span>';
 
     this.dropdown = document.createElement('div');
@@ -142,16 +158,16 @@ export class IntelligenceFindingsBadge {
     this.badge.classList.remove('status-none', 'status-low', 'status-high');
     if (count === 0) {
       this.badge.classList.add('status-none');
-      this.badge.title = 'No recent intelligence findings';
+      this.badge.title = isPolkam ? 'Tidak ada temuan intelijen terkini' : 'No recent intelligence findings';
     } else if (hasCritical || hasHigh) {
       this.badge.classList.add('status-high');
-      this.badge.title = `${count} intelligence findings - review recommended`;
+      this.badge.title = isPolkam ? `${count} temuan intelijen - perlu ditinjau` : `${count} intelligence findings - review recommended`;
     } else if (count <= LOW_COUNT_THRESHOLD) {
       this.badge.classList.add('status-low');
-      this.badge.title = `${count} intelligence finding${count > 1 ? 's' : ''}`;
+      this.badge.title = isPolkam ? `${count} temuan intelijen` : `${count} intelligence finding${count > 1 ? 's' : ''}`;
     } else {
       this.badge.classList.add('status-high');
-      this.badge.title = `${count} intelligence findings - review recommended`;
+      this.badge.title = isPolkam ? `${count} temuan intelijen - perlu ditinjau` : `${count} intelligence findings - review recommended`;
     }
 
     this.renderDropdown();
@@ -185,14 +201,48 @@ export class IntelligenceFindingsBadge {
       original: a,
     }));
 
-    // Merge and sort by timestamp (newest first), then by priority
-    return [...signalFindings, ...alertFindings].sort((a, b) => {
+    let merged = [...signalFindings, ...alertFindings];
+
+    // Polkam variant: only show findings with significant impact on Indonesia
+    if (isPolkam) {
+      merged = merged.filter(f => {
+        // Only show high/critical priority findings
+        if (f.priority !== 'critical' && f.priority !== 'high') return false;
+        return this.isIndonesiaRelevant(f);
+      });
+    }
+
+    // Sort by timestamp (newest first), then by priority
+    return merged.sort((a, b) => {
       const timeDiff = b.timestamp.getTime() - a.timestamp.getTime();
       if (Math.abs(timeDiff) < SORT_TIME_TOLERANCE_MS) {
         return this.priorityScore(b.priority) - this.priorityScore(a.priority);
       }
       return timeDiff;
     });
+  }
+
+  private isIndonesiaRelevant(finding: UnifiedFinding): boolean {
+    // Alert-type findings have country data
+    if (finding.source === 'alert') {
+      const alert = finding.original as UnifiedAlert;
+      if (alert.countries.some(c => INDONESIA_COUNTRIES.has(c))) return true;
+    }
+
+    // Check title and description for Indonesia-relevant keywords
+    const text = `${finding.title} ${finding.description}`;
+    if (INDONESIA_KEYWORDS.test(text)) return true;
+
+    // Check related topics from signal data
+    if (finding.source === 'signal') {
+      const signal = finding.original as CorrelationSignal;
+      const topics = signal.data.relatedTopics?.join(' ') || '';
+      const entities = signal.data.correlatedEntities?.join(' ') || '';
+      const news = signal.data.correlatedNews?.join(' ') || '';
+      if (INDONESIA_KEYWORDS.test(`${topics} ${entities} ${news}`)) return true;
+    }
+
+    return false;
   }
 
   private priorityToConfidence(priority: string): number {
@@ -207,15 +257,19 @@ export class IntelligenceFindingsBadge {
 
   private renderDropdown(): void {
     if (this.findings.length === 0) {
+      const emptyTitle = isPolkam ? 'Intelligence Findings — Indonesia' : 'Intelligence Findings';
+      const emptyText = isPolkam
+        ? 'Monitoring for significant threats to Indonesia...'
+        : 'Scanning for correlations and anomalies...';
       this.dropdown.innerHTML = `
         <div class="findings-header">
-          <span class="header-title">Intelligence Findings</span>
+          <span class="header-title">${emptyTitle}</span>
           <span class="findings-badge none">MONITORING</span>
         </div>
         <div class="findings-content">
           <div class="findings-empty">
             <span class="empty-icon">📡</span>
-            <span class="empty-text">Scanning for correlations and anomalies...</span>
+            <span class="empty-text">${emptyText}</span>
           </div>
         </div>
       `;
@@ -226,13 +280,13 @@ export class IntelligenceFindingsBadge {
     const highCount = this.findings.filter(f => f.priority === 'high' || f.confidence >= 70).length;
 
     let statusClass = 'moderate';
-    let statusText = `${this.findings.length} DETECTED`;
+    let statusText = isPolkam ? `${this.findings.length} TERDETEKSI` : `${this.findings.length} DETECTED`;
     if (criticalCount > 0) {
       statusClass = 'critical';
-      statusText = `${criticalCount} CRITICAL`;
+      statusText = isPolkam ? `${criticalCount} KRITIS` : `${criticalCount} CRITICAL`;
     } else if (highCount > 0) {
       statusClass = 'high';
-      statusText = `${highCount} HIGH PRIORITY`;
+      statusText = isPolkam ? `${highCount} PRIORITAS TINGGI` : `${highCount} HIGH PRIORITY`;
     }
 
     const findingsHtml = this.findings.slice(0, MAX_VISIBLE_FINDINGS).map(finding => {
@@ -257,16 +311,17 @@ export class IntelligenceFindingsBadge {
     }).join('');
 
     const moreCount = this.findings.length - MAX_VISIBLE_FINDINGS;
+    const headerTitle = isPolkam ? 'Intelligence Findings — Indonesia' : 'Intelligence Findings';
     this.dropdown.innerHTML = `
       <div class="findings-header">
-        <span class="header-title">Intelligence Findings</span>
+        <span class="header-title">${headerTitle}</span>
         <span class="findings-badge ${statusClass}">${statusText}</span>
       </div>
       <div class="findings-content">
         <div class="findings-list">
           ${findingsHtml}
         </div>
-        ${moreCount > 0 ? `<div class="findings-more">+${moreCount} more findings</div>` : ''}
+        ${moreCount > 0 ? `<div class="findings-more">+${moreCount} ${isPolkam ? 'temuan lainnya' : 'more findings'}</div>` : ''}
       </div>
     `;
   }
@@ -280,13 +335,18 @@ export class IntelligenceFindingsBadge {
     const alert = finding.original as UnifiedAlert;
     if (alert.type === 'cii_spike') {
       const cii = alert.components.ciiChange;
+      if (isPolkam) {
+        if (cii && cii.change >= 30) return 'Destabilisasi kritis - perlu perhatian segera';
+        if (cii && cii.change >= 20) return 'Pergeseran signifikan - pantau ketat';
+        return 'Situasi berkembang - pantau potensi eskalasi';
+      }
       if (cii && cii.change >= 30) return 'Critical destabilization - immediate attention';
       if (cii && cii.change >= 20) return 'Significant shift - monitor closely';
       return 'Developing situation - track for escalation';
     }
-    if (alert.type === 'convergence') return 'Multiple events clustering in region';
-    if (alert.type === 'cascade') return 'Infrastructure disruption spreading';
-    return 'Review for situational awareness';
+    if (alert.type === 'convergence') return isPolkam ? 'Beberapa peristiwa terkonsentrasi di wilayah ini' : 'Multiple events clustering in region';
+    if (alert.type === 'cascade') return isPolkam ? 'Gangguan infrastruktur menyebar' : 'Infrastructure disruption spreading';
+    return isPolkam ? 'Tinjau untuk kesadaran situasional' : 'Review for situational awareness';
   }
 
   private getTypeIcon(type: string): string {
@@ -315,6 +375,12 @@ export class IntelligenceFindingsBadge {
 
   private formatTimeAgo(date: Date): string {
     const ms = Date.now() - date.getTime();
+    if (isPolkam) {
+      if (ms < 60000) return 'baru saja';
+      if (ms < 3600000) return `${Math.floor(ms / 60000)} menit lalu`;
+      if (ms < 86400000) return `${Math.floor(ms / 3600000)} jam lalu`;
+      return `${Math.floor(ms / 86400000)} hari lalu`;
+    }
     if (ms < 60000) return 'just now';
     if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
     if (ms < 86400000) return `${Math.floor(ms / 3600000)}h ago`;
@@ -364,7 +430,7 @@ export class IntelligenceFindingsBadge {
     overlay.innerHTML = `
       <div class="findings-modal">
         <div class="findings-modal-header">
-          <span class="findings-modal-title">🎯 All Intelligence Findings (${this.findings.length})</span>
+          <span class="findings-modal-title">🎯 ${isPolkam ? `Semua Temuan Intelijen (${this.findings.length})` : `All Intelligence Findings (${this.findings.length})`}</span>
           <button class="findings-modal-close">×</button>
         </div>
         <div class="findings-modal-content">

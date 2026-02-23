@@ -12,7 +12,7 @@ import {
   STORAGE_KEYS,
   SITE_VARIANT,
 } from '@/config';
-import { fetchCategoryFeeds, fetchMultipleStocks, fetchCrypto, fetchPredictions, fetchEarthquakes, fetchWeatherAlerts, fetchFredData, fetchInternetOutages, isOutagesConfigured, fetchAisSignals, initAisStream, getAisStatus, disconnectAisStream, isAisConfigured, fetchCableActivity, fetchProtestEvents, getProtestStatus, fetchFlightDelays, fetchMilitaryFlights, fetchMilitaryVessels, initMilitaryVesselStream, isMilitaryVesselTrackingConfigured, initDB, updateBaseline, calculateDeviation, addToSignalHistory, saveSnapshot, cleanOldSnapshots, analysisWorker, fetchPizzIntStatus, fetchGdeltTensions, fetchNaturalEvents, fetchRecentAwards, fetchOilAnalytics } from '@/services';
+import { fetchCategoryFeeds, fetchMultipleStocks, fetchCrypto, fetchPredictions, fetchEarthquakes, fetchWeatherAlerts, fetchFredData, fetchInternetOutages, isOutagesConfigured, fetchAisSignals, initAisStream, getAisStatus, disconnectAisStream, isAisConfigured, fetchCableActivity, fetchProtestEvents, getProtestStatus, fetchFlightDelays, fetchMilitaryFlights, fetchMilitaryVessels, initMilitaryVesselStream, isMilitaryVesselTrackingConfigured, initDB, updateBaseline, calculateDeviation, addToSignalHistory, saveSnapshot, cleanOldSnapshots, analysisWorker, fetchGdeltTensions, fetchNaturalEvents, fetchRecentAwards, fetchOilAnalytics } from '@/services';
 import { fetchCountryMarkets } from '@/services/polymarket';
 import { mlWorker } from '@/services/ml-worker';
 import { clusterNewsHybrid } from '@/services/clustering';
@@ -327,8 +327,8 @@ export class App {
   }
 
   private setupPizzIntIndicator(): void {
-    // Skip DEFCON indicator for tech/startup variant
-    if (SITE_VARIANT === 'tech') return;
+    // Only show geopolitical tensions on polkam variant
+    if (SITE_VARIANT !== 'polkam') return;
 
     this.pizzintIndicator = new PizzIntIndicator();
     const headerLeft = this.container.querySelector('.header-left');
@@ -339,24 +339,19 @@ export class App {
 
   private async loadPizzInt(): Promise<void> {
     try {
-      const [status, tensions] = await Promise.all([
-        fetchPizzIntStatus(),
-        fetchGdeltTensions()
-      ]);
+      const tensions = await fetchGdeltTensions();
 
-      // Hide indicator if no valid data (API returned default/empty)
-      if (status.locationsMonitored === 0) {
+      if (!tensions || tensions.length === 0) {
         this.pizzintIndicator?.hide();
         this.statusPanel?.updateApi('PizzINT', { status: 'error' });
         return;
       }
 
       this.pizzintIndicator?.show();
-      this.pizzintIndicator?.updateStatus(status);
       this.pizzintIndicator?.updateTensions(tensions);
       this.statusPanel?.updateApi('PizzINT', { status: 'ok' });
     } catch (error) {
-      console.error('[App] PizzINT load failed:', error);
+      console.error('[App] Geopolitical tensions load failed:', error);
       this.pizzintIndicator?.hide();
       this.statusPanel?.updateApi('PizzINT', { status: 'error' });
     }
