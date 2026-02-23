@@ -820,6 +820,31 @@ const POLKAM_FEEDS: Record<string, Feed[]> = {
     { name: 'Indonesia Crime (EN)', url: enNews('(Indonesia crime OR Indonesia corruption OR Indonesia drug OR Indonesia police OR Indonesia arrest) when:3d') },
     { name: 'Jakarta Post Hukum', url: enNews('site:thejakartapost.com (crime OR disaster OR earthquake OR flood OR corruption) when:3d') },
   ],
+  weather: [
+    // === CUACA — site-specific from major Indonesian outlets ===
+    { name: 'Kompas Cuaca', url: idNews('site:kompas.com (cuaca OR BMKG OR iklim OR "cuaca ekstrem") when:3d') },
+    { name: 'Detik Cuaca', url: idNews('site:detik.com (cuaca OR BMKG OR iklim OR "cuaca ekstrem") when:3d') },
+    { name: 'CNN Indonesia Cuaca', url: idNews('site:cnnindonesia.com (cuaca OR BMKG OR iklim OR "hujan lebat") when:3d') },
+    { name: 'Tempo Cuaca', url: idNews('site:tempo.co (cuaca OR BMKG OR iklim OR lingkungan) when:3d') },
+    { name: 'Tribunnews Cuaca', url: idNews('site:tribunnews.com (cuaca OR BMKG OR "cuaca ekstrem") when:3d') },
+    { name: 'Liputan6 Cuaca', url: idNews('site:liputan6.com (cuaca OR BMKG OR "cuaca ekstrem") when:3d') },
+    { name: 'Antara Cuaca', url: idNews('site:antaranews.com (cuaca OR BMKG OR iklim) when:3d') },
+    // === CUACA — topic-specific queries (Bahasa) ===
+    { name: 'Prakiraan Cuaca', url: idNews('(BMKG OR "prakiraan cuaca" OR "peringatan dini cuaca" OR "cuaca ekstrem") Indonesia when:2d') },
+    { name: 'Hujan & Badai', url: idNews('("hujan lebat" OR "angin kencang" OR "gelombang tinggi" OR badai OR "curah hujan") Indonesia when:3d') },
+    { name: 'Musim & Iklim', url: idNews('("musim hujan" OR "musim kemarau" OR "la nina" OR "el nino" OR "perubahan iklim") Indonesia when:7d') },
+    { name: 'Suhu & Panas', url: idNews('(suhu OR "suhu panas" OR "gelombang panas" OR "suhu ekstrem" OR kemarau OR kekeringan) Indonesia when:7d') },
+    { name: 'Kabut Asap & Polusi', url: idNews('("kabut asap" OR "kualitas udara" OR polusi OR ISPU OR "indeks pencemaran") Indonesia when:3d') },
+    { name: 'Siklon Tropis', url: idNews('("siklon tropis" OR "badai tropis" OR siklon OR "tekanan rendah") Indonesia when:7d') },
+    // === International weather feeds ===
+    { name: 'GDACS Alerts', url: rss('https://www.gdacs.org/xml/rss_24h.xml') },
+    { name: 'GDACS Floods', url: rss('https://www.gdacs.org/xml/rss_fl_7d.xml') },
+    { name: 'GDACS Cyclones', url: rss('https://www.gdacs.org/xml/rss_tc_7d.xml') },
+    { name: 'ReliefWeb Indonesia', url: rss('https://reliefweb.int/updates/rss.xml?advanced-search=%28PC120%29') },
+    // === English sources ===
+    { name: 'Indonesia Weather (EN)', url: enNews('(Indonesia weather OR Indonesia monsoon OR Indonesia flood warning OR BMKG) when:3d') },
+    { name: 'SE Asia Weather (EN)', url: enNews('("Southeast Asia" weather OR tropical cyclone OR monsoon OR "Asia Pacific" weather) when:3d') },
+  ],
 };
 
 // Variant-aware exports

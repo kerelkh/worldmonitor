@@ -212,6 +212,7 @@ const POLKAM_PANELS: Record<string, PanelConfig> = {
   markets: { name: 'Markets', enabled: true, priority: 1 },
   commodities: { name: 'Commodities', enabled: true, priority: 1 },
   finance: { name: 'Financial', enabled: true, priority: 1 },
+  weather: { name: 'Cuaca & Iklim', enabled: true, priority: 1 },
   monitors: { name: 'My Monitors', enabled: true, priority: 2 },
 };
 

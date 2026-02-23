@@ -164,6 +164,9 @@ const ALLOWED_DOMAINS = [
   'www.detik.com',
   'www.bisnis.com',
   'www.kontan.co.id',
+  // Weather & Disaster feeds (Polkam variant)
+  'www.gdacs.org',
+  'reliefweb.int',
 ];
 
 // CORS helper - allow worldmonitor.app and Vercel preview domains

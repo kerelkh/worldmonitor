@@ -1344,6 +1344,11 @@ export class App {
       this.attachRelatedAssetHandlers(criminalsPanel);
       this.newsPanels['criminals'] = criminalsPanel;
       this.panels['criminals'] = criminalsPanel;
+
+      const weatherPanel = new NewsPanel('weather', 'Cuaca & Iklim');
+      this.attachRelatedAssetHandlers(weatherPanel);
+      this.newsPanels['weather'] = weatherPanel;
+      this.panels['weather'] = weatherPanel;
     }
 
     const techPanel = new NewsPanel('tech', 'Technology / AI');
@@ -2396,6 +2401,7 @@ export class App {
     const allCategories = [
       { key: 'indonesia', feeds: (FEEDS as Record<string, Feed[]>).indonesia },
       { key: 'criminals', feeds: (FEEDS as Record<string, Feed[]>).criminals, topLimit: 40 },
+      { key: 'weather', feeds: (FEEDS as Record<string, Feed[]>).weather },
       { key: 'politics', feeds: FEEDS.politics },
       { key: 'tech', feeds: FEEDS.tech },
       { key: 'finance', feeds: FEEDS.finance },
