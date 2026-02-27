@@ -2461,7 +2461,7 @@ export class App {
         if (intelPanel) intelPanel.showError('All Intel sources disabled');
         this.statusPanel?.updateFeed('Intel', { status: 'ok', itemCount: 0 });
       } else {
-        const intelResult = await Promise.allSettled([fetchCategoryFeeds(enabledIntelSources)]);
+        const intelResult = await Promise.allSettled([fetchCategoryFeeds(enabledIntelSources, { topLimit: 40 })]);
         if (intelResult[0]?.status === 'fulfilled') {
           const intel = intelResult[0].value;
           if (intelPanel) {
